@@ -1,0 +1,17 @@
+code,en
+100,stopping application
+101,application stoped
+102,{} is not the subclass of {}
+103,file {} is not found
+110,{} requires parameter {}
+111,"{} parameter {} type error, {} is not {}"
+112,HierarchyElementMeta does not setup properly: {}
+113,{} parameter {} is not valid
+114,copied name {} should not equal to the origin name {}
+120,{} and {} contain duplicated key {}
+121,"loading component failed, server: {}, key: {}"
+122,component type {} does not exist
+130,"loading controller enum failed, server: {}, key: {}"
+140,{} requires parameter {}
+141,{} has been uploaded
+150,failed to connect server {}

@@ -1,0 +1,16 @@
+
+# This is packing list indicated what are the files should be pack
+# If this file does not exist under the project folder, all of the files under the folder will be packed
+
+include:
+# List absolute or relative path of additional file or directory to be packed
+# - example.txt
+# - example_dir
+
+exclude:
+# List absolute or relative path of file, directory, or file extension to be ignored.
+# - 'hyssop/unit_test'
+# - 'hyssop/web/client.py'
+- 'hyssop/web/pack.py'
+- '.log'
+- 'pack.yaml'

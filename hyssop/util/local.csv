@@ -1,0 +1,19 @@
+code,en
+0,"language: {}, code: {} does not exist"
+1,"duplicated code - code: {}, language: {}"
+2,"language file parsing failed, file: {}"
+3,"message format error, code: {} args: {}"
+10,must be an async function
+11,async generator didn't yield
+12,async generator didn't stop
+13,async generator didn't stop after athrow()
+20,"enum type is not valid got: {}, valid type: {}"
+21,{} is not awaitable function
+22,"Invalid thread call, caller thread: {}, registered thread: {}"
+30,"DynamicTypeEnum must be Tuple or List (enum_type_key:str, module:str, class_or_function:str)"
+31,{} must be a class
+32,{} must be a function
+33,{} is not the subclass of {}
+40,{} is not the subclass of HierarchyElementMeta
+41,{} has not cls_parameters
+42,{} cls_parameters does not contain {}
