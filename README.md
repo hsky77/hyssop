@@ -10,7 +10,7 @@
 
 ## Hello world
 
-create a minimal runable server project:
+Create a minimal runable server project:
    * In command prompt, create a project named hello: `python3 -m hyssop create hello`
    * Start the project: `python3 -m hyssop start hello`
    * Open Browser views the response of hello api, [http://localhost:8888/hello](http://localhost:8888/hello)
@@ -21,4 +21,4 @@ Read [documentation](https://hyssop.readthedocs.io/en/latest/) for more informat
 ## Change log
 
 * **1.0.0 - Aug. 20, 2020**:
-   * Initalizing project.
+   * Initalize project.
