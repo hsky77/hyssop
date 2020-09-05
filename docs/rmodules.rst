@@ -72,19 +72,19 @@ Briefly list the things should be done for each reserved module:
 * `controller <buildin.html#controllers>`__
 
     * Define the enums inherits from ``hyssop.web.controller.ControllerType`` in ``__init__.py``
-    * Implement the controller class inherits from such as `hyssop.web.controller.tornado.RequestController <ff>`__
+    * Implement the controller class inherits from such as `hyssop.web.controller.tornado.RequestController <web_refer.html#hyssop.web.controller.RequestController>`__
     * Configre the controller block in ``server_config.yaml``
 
 * `component <buildin.html#components>`__
 
     * Define the enums inherits from ``hyssop.web.component.ComponentTypes`` in ``__init__.py``
-    * Implement the component class inherits from `hyssop.web.component.Component <web_refer.html#hyssop.web.component.default_component.Component>`__
+    * Implement the component class inherits from `hyssop.web.component.Component <web_refer.html#hyssop.web.component.Component>`__
     * Configre the component block in ``server_config.yaml``
 
 * `unit_test <buildin.html#unittest-cases>`__
 
     * Define the enums inherits from ``hyssop.unit_test.UnitTestTypes`` in ``__init__.py``
-    * Implement the test cases inherits from `hyssop.unit_test.UnitTestCase <web_refer.html#hyssop.unit_test.UnitTestCase>`__
+    * Implement the test cases inherits from ``hyssop.unit_test.UnitTestCase``
 
 Configuration Validator
 =======================================================

@@ -236,7 +236,7 @@ Unittest Cases
 ==========================
 
 **hyssop** reserves module **unit_test** base on `unittest <https://docs.python.org/3/library/unittest.html>`__ to test the server project or **hyssop** itself.
-Define enum inherits `hyssop.unit_test.UnitTestTypes <web_refer.html#hyssop.unit_test.UnitTestCase>`__ to allow **hyssop** tests projects
+Define enum inherits ``hyssop.unit_test.UnitTestTypes`` to allow **hyssop** tests projects
 
 * Run test in command prompt:
 
