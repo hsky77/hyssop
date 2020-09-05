@@ -7,7 +7,7 @@
 File created: August 21st 2020
 
 Modified By: hsky77
-Last Updated: August 27th 2020 12:56:34 pm
+Last Updated: September 4th 2020 21:38:05 pm
 '''
 
 
@@ -80,7 +80,7 @@ class Localization():
                                 '\n', '')
                         else:
                             raise KeyError(self.get_message(
-                                LocalCode_Duplicated_Code, line[0], lang.name))
+                                LocalCode_Duplicated_Code, line[0], lang))
                         idx = idx + 1
 
     def has_message(self, code: str) -> bool:

@@ -7,7 +7,7 @@
 File created: August 21st 2020
 
 Modified By: hsky77
-Last Updated: September 4th 2020 14:40:07 pm
+Last Updated: September 5th 2020 20:56:18 pm
 '''
 
 import os
@@ -273,12 +273,12 @@ def get_command_parser():
 
 def _init_server_package(server_dir: str) -> None:
     if server_dir is not None:
-        if not join_path(Module_Path) in server_dir and not server_dir in sys.path:
-            sys.path.insert(0, os.path.abspath(server_dir))
-
         if (not join_path(Module_Path) in server_dir and
                 not os.path.dirname(os.path.abspath(server_dir)) in sys.path):
             sys.path.insert(0, os.path.dirname(os.path.abspath(server_dir)))
+
+        if not join_path(Module_Path) in server_dir and not server_dir in sys.path:
+            sys.path.insert(0, os.path.abspath(server_dir))
 
         from .util import get_class
         from .web import Component_Module_Folder, Controller_Module_Folder, Unittest_Module_Folder
