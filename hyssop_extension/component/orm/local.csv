@@ -1,0 +1,13 @@
+code,en
+500,"there is not valid datetime format, input: {}"
+501,{} is not allowed to update
+502,column {} type must be {}
+503,column {} is not valid
+510,required file_name is missing
+511,required host is missing
+512,required user is missing
+513,required password is missing
+514,required db_name is missing
+515,{} is not the subclass of {}
+516,{} is not belong to a class
+520,Database {} contains modele {} is not supported
