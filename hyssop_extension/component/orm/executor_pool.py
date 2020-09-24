@@ -7,7 +7,7 @@
 File created: September 4th 2020
 
 Modified By: hsky77
-Last Updated: September 4th 2020 21:26:56 pm
+Last Updated: September 17th 2020 15:53:51 pm
 '''
 
 import time
@@ -160,27 +160,27 @@ class OrmExecutor(Executor):
     def cancel_reservation(self):
         self.connector.release(self)
 
-    def _execute(self, func, **kwargs):
+    def execute(self, func, *args, **kwargs):
         if issubclass(type(self.uw), IUnitOfWork):
             try:
-                return super().run_method(func, self.connector.session, **kwargs)
+                return super().run_method(func, self.connector.session, *args, **kwargs)
             except DBAPIError as e:
                 self.close_session()
                 raise e from e
         else:
             raise TypeError(BaseLocal.get_message(
-                LocalCode_Is_Not_Sub_Type, self.uw, IUnitOfWork))
+                LocalCode_Is_Not_Sub_Type, type(self.uw), IUnitOfWork))
 
-    async def _execute_async(self, func, **kwargs):
+    async def execute_async(self, func, *args, **kwargs):
         if issubclass(type(self.uw), IUnitOfWork):
             try:
-                return await super().run_method_async(func, self.connector.session, **kwargs)
+                return await super().run_method_async(func, self.connector.session, *args, **kwargs)
             except DBAPIError as e:
                 await self.close_session_async()
-                raise e from e                
+                raise e from e
         else:
             raise TypeError(BaseLocal.get_message(
-                LocalCode_Is_Not_Sub_Type, self.uw, IUnitOfWork))
+                LocalCode_Is_Not_Sub_Type, type(self.uw), IUnitOfWork))
 
     def run_method_in_queue(self,
                             func: Callable,
@@ -213,145 +213,157 @@ class OrmExecutor(Executor):
         """
         Select database with or without keys and return a list of entities.
         """
-        return self._execute(self.uw.select, **kwargs)
+        return self.execute(self.uw.select, **kwargs)
 
     async def select_async(self, **kwargs) -> List[Entity]:
         """
         Select database with or without keys and return a list of entities.
         """
-        return await self._execute_async(self.uw.select, **kwargs)
+        return await self.execute_async(self.uw.select, **kwargs)
 
     def load(self, **kwargs) -> Entity:
         """
         Select database with or without keys, and return first matched entity.
         """
-        return self._execute(self.uw.load, **kwargs)
+        return self.execute(self.uw.load, **kwargs)
 
     async def load_async(self, **kwargs) -> Entity:
         """
         Select database with or without keys, and return first matched entity.
         """
-        return await self._execute_async(self.uw.load, **kwargs)
+        return await self.execute_async(self.uw.load, **kwargs)
 
     def delete(self, entities: List[Entity], **kwargs) -> None:
         """
         Delete a list of entities from database.
         """
-        return self._execute(self.uw.delete, **kwargs)
+        return self.execute(self.uw.delete, entities, **kwargs)
 
     async def delete_async(self, entities: List[Entity], **kwargs) -> None:
         """
         Delete a list of entities from database.
         """
-        return await self._execute_async(self.uw.delete, **kwargs)
+        return await self.execute_async(self.uw.delete, entities, **kwargs)
 
     def add(self, **kwargs) -> Entity:
         """
         Insert one entity. Raise exception if it exists.
         """
-        return self._execute(self.uw.add, **kwargs)
+        return self.execute(self.uw.add, **kwargs)
 
     async def add_async(self, **kwargs) -> Entity:
         """
         Insert one entity. Raise exception if it exists.
         """
-        return await self._execute_async(self.uw.add, **kwargs)
+        return await self.execute_async(self.uw.add, **kwargs)
 
     def merge(self, **kwargs) -> Entity:
         """
         Insert or replace one entity.
         """
-        return self._execute(self.uw.merge, **kwargs)
+        return self.execute(self.uw.merge, **kwargs)
 
     async def merge_async(self, **kwargs) -> Entity:
         """
         Insert or replace one entity.
         """
-        return await self._execute_async(self.uw.merge, **kwargs)
+        return await self.execute_async(self.uw.merge, **kwargs)
 
     def update(self, entity: Entity, **kwargs) -> None:
         """
         Update entity values.
         """
-        return self._execute(self.uw.update, **kwargs)
+        return self.execute(self.uw.update, entity, **kwargs)
 
     async def update_async(self, entity: Entity, **kwargs) -> None:
         """
         Update entity values.
         """
-        return await self._execute_async(self.uw.update, **kwargs)
+        return await self.execute_async(self.uw.update, entity, **kwargs)
+
+    def relationship_merge(self, parent: Entity, name: str, child: Entity):
+        """
+        append entity to relationship field
+        """
+        return self.execute(self.uw.relationship_merge, parent, name, child)
+
+    async def relationship_merge_async(self, parent: Entity, name: str, child: Entity):
+        """
+        append entity to relationship field
+        """
+        return await self.execute_async(self.uw.relationship_merge, parent, name, child)
+
+    def relationship_remove(self, parent: Entity, name: str, child: Entity):
+        """
+        remove entity from relationship field
+        """
+        return self.execute(self.uw.relationship_remove, parent, name, child)
+
+    async def relationship_remove_async(self, parent: Entity, name: str, child: Entity):
+        """
+        remove entity from relationship field
+        """
+        return await self.execute_async(self.uw.relationship_remove, parent, name, child)
 
     def validate(self, entity: Entity, raise_exception: bool = True) -> bool:
         """
         Validate entity column values.
         """
-        return self._execute(self.uw.validate, entity=entity, raise_exception=raise_exception)
+        return self.execute(self.uw.validate, entity, raise_exception=raise_exception)
 
     async def validate_async(self, entity: Entity, raise_exception: bool = True) -> bool:
         """
         Validate entity column values.
         """
-        return await self._execute_async(self.uw.validate, entity=entity, raise_exception=raise_exception)
-
-    def convert_to_dict(self, entity: Entity) -> Dict[str, Any]:
-        """
-        Generate dict that contains entity column keys and converted values.
-        """
-        return self._execute(self.uw.convert_to_dict, entity=entity)
-
-    async def convert_to_dict_async(self, entity: Entity) -> Dict[str, Any]:
-        """
-        Generate dict that contains entity column keys and converted values.
-        """
-        return await self._execute(self.uw.convert_to_dict, entity=entity)
+        return await self.execute_async(self.uw.validate, entity, raise_exception=raise_exception)
 
     def refresh(self, entity: Entity) -> Entity:
         """
         Refresh entity from database.
         """
-        return self._execute(self.uw.refresh, entity=entity)
+        return self.execute(self.uw.refresh, entity)
 
     async def refresh_async(self, entity: Entity) -> Entity:
         """
         Refresh entity from database.
         """
-        return await self._execute_async(self.uw.refresh, entity=entity)
+        return await self.execute_async(self.uw.refresh, entity)
 
     def flush(self) -> Tuple[int, int, int]:
         """
         Flush the session of database connection. Return changes (new, updated, deleted)
         """
-        return self._execute(self.uw.flush)
+        return self.execute(self.uw.flush)
 
     async def flush_async(self) -> Tuple[int, int, int]:
         """
         Flush the session of database connection. Return changes (new, updated, deleted)
         """
-        return await self._execute_async(self.uw.flush)
+        return await self.execute_async(self.uw.flush)
 
     def rollback(self) -> None:
         """
         Rollback the session of database connection.
         """
-        return self._execute(self.uw.rollback)
+        return self.execute(self.uw.rollback)
 
     async def rollback_async(self) -> None:
         """
         Rollback the session of database connection.
         """
-        return await self._execute_async(self.uw.rollback)
+        return await self.execute_async(self.uw.rollback)
 
     def commit(self) -> Tuple[int, int, int]:
         """
         Commit the changes to the database. Return changes (new, updated, deleted)
         """
-        return self._execute(self.uw.commit)
+        return self.execute(self.uw.commit)
 
     async def commit_async(self) -> Tuple[int, int, int]:
         """
         Commit the changes to the database. Return changes (new, updated, deleted)
         """
-        return await self._execute_async(self.uw.commit)
+        return await self.execute_async(self.uw.commit)
 
 
 class OrmExecutorFactory(ExecutorFactory):
@@ -364,8 +376,10 @@ class OrmExecutorFactory(ExecutorFactory):
     def dispose(self):
         if not self._disposed:
             self._disposed = True
-            for w in self._pool:
+            for w in self.workers:
                 w.run_method(w.connector.close_session)
+                while w.pending_count > 0:
+                    time.sleep(0)
                 w.dispose()
 
     def get_connection_string(self, db_module: DB_MODULE_NAME, **kwargs):

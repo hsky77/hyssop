@@ -7,7 +7,7 @@
 File created: September 4th 2020
 
 Modified By: hsky77
-Last Updated: September 4th 2020 17:49:45 pm
+Last Updated: September 7th 2020 20:08:24 pm
 '''
 
 from hyssop.web.component import ComponentTypes
@@ -46,5 +46,4 @@ WebConfigComponentValidator.set_cls_parameters(
 
 
 class HyssopExtensionComponentTypes(ComponentTypes):
-    """server loads configured components of this enum type when start"""
     OrmDB = ('orm_db', 'orm', 'OrmDBComponent')

@@ -7,7 +7,7 @@
 File created: September 4th 2020
 
 Modified By: hsky77
-Last Updated: September 4th 2020 17:48:02 pm
+Last Updated: September 17th 2020 15:53:39 pm
 '''
 
 import json
@@ -65,7 +65,7 @@ class EntityMixin():
         Get list of non-primary key column names
         """
         pkeys = cls.primary_keys()
-        return [x.name for x in cls.columns() if not x.name in pkeys]
+        return [x for x in cls.columns() if not x in pkeys]
 
     @property
     def identity(self) -> Tuple[Any]:
@@ -77,7 +77,7 @@ class EntityMixin():
     @property
     def key_values(self) -> Dict[str, Any]:
         """
-        Get dict contains primary key columns
+        Get dict contains columns
         """
         return {k: getattr(self, k) for k in self.columns()}
 
@@ -107,6 +107,12 @@ class EntityMixin():
                     return False
             return True
         return False
+
+    def to_json_dict(self) -> Dict[str, Any]:
+        """
+        Generate dict that is serializable by Json convertor
+        """
+        return {k: v if not type(v) is datetime else str(v) for k, v in self.key_values.items()}
 
 
 Entity = Union[DeclarativeMeta, EntityMixin]
@@ -155,15 +161,21 @@ class IUnitOfWork():
         """
         raise NotImplementedError()
 
-    def validate(self, entity: Entity, raise_exception: bool = True) -> bool:
+    def relationship_merge(self, session: Session, parent: Entity, name: str, child: Entity):
         """
-        Validate entity column values.
+        append entity to relationship field
         """
         raise NotImplementedError()
 
-    def convert_to_dict(self, entity: Entity) -> Dict[str, Any]:
+    def relationship_remove(self, session: Session, parent: Entity, name: str, child: Entity):
         """
-        Generate dict that contains entity column keys and converted values.
+        remove entity from relationship field
+        """
+        raise NotImplementedError()
+
+    def validate(self, entity: Entity, raise_exception: bool = True) -> bool:
+        """
+        Validate entity column values.
         """
         raise NotImplementedError()
 
@@ -242,13 +254,13 @@ class BasicUW(IUnitOfWork):
         """
         Insert or replace one entity.
         """
-        pkeys = self.entity_cls.get_primary_key_args(**kwargs)
-        entity = self.load(session, **pkeys)
+        entity = self.load(session, **kwargs)
         if entity is None:
             entity = self.add(session, **kwargs)
         else:
             self.update(
-                session, entity, **self.entity_cls.get_non_primary_key_args(**kwargs))
+                session, entity,
+                **{k: v for k, v in kwargs.items() if k in self.entity_cls.non_primary_keys()})
         return entity
 
     def update(self, session: Session, entity: Entity, **kwargs) -> None:
@@ -267,11 +279,21 @@ class BasicUW(IUnitOfWork):
             else:
                 raise RuntimeError(LocalCode_Invalid_Column, k)
 
-    def convert_to_dict(self, entity: Entity) -> Dict[str, Any]:
+    def relationship_merge(self, session: Session, parent: Entity, name: str, child: Entity):
         """
-        Generate dict that contains entity column keys and converted values.
+        append entity to relationship field
         """
-        return entity.key_values
+        f = getattr(parent, name)
+        if not child in f:
+            f.append(child)
+
+    def relationship_remove(self, session: Session, parent: Entity, name: str, child: Entity):
+        """
+        remove entity from relationship field
+        """
+        f = getattr(parent, name)
+        if child in f:
+            f.remove(child)
 
     def refresh(self, session: Session, entity: Entity) -> Entity:
         """

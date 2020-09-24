@@ -34,8 +34,10 @@ File created: September 4th 2020
                     ...etc
 
 Modified By: hsky77
-Last Updated: September 4th 2020 17:49:06 pm
+Last Updated: September 17th 2020 14:37:18 pm
 '''
+
+import logging
 
 from typing import Callable, Dict, Any
 
@@ -50,7 +52,7 @@ from .constants import LocalCode_Not_Support_DB_Module
 
 class OrmDBComponent(Component):
     """
-    optional component for managing sql database access with server config
+    Component for managing sql database access with server config
     """
 
     default_loggers = ['sqlalchemy', 'sqlalchemy.orm.mapper.Mapper']
@@ -88,7 +90,7 @@ class OrmDBComponent(Component):
     def init_db_declarative_base(self, db_id: str, declared_entity_base: DeclarativeMeta) -> None:
         if db_id in self.dbs:
             if not self.dbs[db_id]['db']:
-                db = OrmExecutorFactory(db_id)
+                db = OrmExecutorFactory(db_id, self.dbs[db_id]['connections'])
 
                 module = DB_MODULE_NAME.SQLITE_MEMORY
                 if self.dbs[db_id]['module'] == 'sqlite':
@@ -113,3 +115,7 @@ class OrmDBComponent(Component):
 
 # add sqlalchemy logger as the default logger in logger component
 add_module_default_logger(OrmDBComponent.default_loggers)
+
+for name in OrmDBComponent.default_loggers:
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.ERROR)
