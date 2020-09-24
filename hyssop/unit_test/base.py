@@ -7,9 +7,10 @@
 File created: August 21st 2020
 
 Modified By: hsky77
-Last Updated: August 27th 2020 12:29:32 pm
+Last Updated: September 24th 2020 12:13:59 pm
 '''
 
+import time
 from unittest import TestCase
 from typing import List, Dict, Any
 
@@ -54,7 +55,7 @@ class UnitTestServer():
         }
     }
 
-    def __init__(self, name: str = 'UT Server', port: int = 58564, debug: bool = False):
+    def __init__(self, name: str = 'UT Server', port: int = 58564, debug: bool = True):
         self._config = {
             'name': name,
             'port': port,
@@ -65,6 +66,10 @@ class UnitTestServer():
 
         self.server_exception = None
         self._server = HyssopServer()
+
+    @property
+    def running(self):
+        return self._running if hasattr(self, '_running') else False
 
     def validate_config(self, component_config: Dict[str, Any] = None, controller_config: [str, Any] = None) -> None:
         if component_config:
@@ -95,15 +100,21 @@ class UnitTestServer():
         self._worker.run_method(self._start, self._server, self._root_dir, self._config,
                                 on_exception=self._on_worker_exception)
 
+        while not self.running:
+            if self.server_exception:
+                raise self.server_exception from self.server_exception
+            time.sleep(0.5)
+
     def stop(self):
         if self._server:
             self._server.stop()
             self._server = None
+            self._running = False
 
         if self._worker:
             self._worker.dispose()
             while self._worker.is_func_running:  # wait for server stoped
-                pass
+                time.sleep(0)
 
             self._worker = None
 
@@ -112,7 +123,9 @@ class UnitTestServer():
         IOLoop().make_current()
 
         server.init(root_dir, config=config)
+        self._running = True
         server.start()
 
     def _on_worker_exception(self, e: Exception):
+        self._running = False
         self.server_exception = e

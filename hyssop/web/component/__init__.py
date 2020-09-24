@@ -44,7 +44,7 @@ This module contains the "yaml" configurable component classes for hyssop applic
                     p1: xxxx        # parameter p1 of Foo.init()
 
 Modified By: hsky77
-Last Updated: September 4th 2020 14:18:05 pm
+Last Updated: September 13th 2020 21:14:06 pm
 '''
 
 from typing import Dict, List, Union
@@ -163,3 +163,7 @@ def create_server_component_manager(component_settings: Union[Dict, None], root_
 def add_module_default_logger(logger_names: List[str]) -> None:
     from .default import LoggerComponent
     LoggerComponent.default_loggers = LoggerComponent.default_loggers + logger_names
+
+
+def get_default_component_manager(root_dir: str):
+    return create_server_component_manager(None, root_dir)
