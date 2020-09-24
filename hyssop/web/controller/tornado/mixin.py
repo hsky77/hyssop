@@ -7,8 +7,10 @@
 File created: August 20th 2020
 
 Modified By: hsky77
-Last Updated: August 27th 2020 16:16:23 pm
+Last Updated: September 20th 2020 18:47:39 pm
 '''
+
+from typing import Dict, Any
 
 from ...component import DefaultComponentTypes, ComponentManager
 from ...component.default import CallbackComponent, LocalizationComponent, ServicesComponent, ExecutorComponent, LoggerComponent, BaseSyncLogger
@@ -77,3 +79,13 @@ class TornadoMixin():
     def log_error(self, msg: str, *args, exc_info=None, extra=None, stack_info=False) -> None:
         self.hyssop_application.comp_executor.run_method_in_queue(
             self.logger.error, msg, *args, exc_info=exc_info, extra=extra, stack_info=stack_info)
+
+    def get_arguments_dict(self, include_arguments=None) -> Dict[str, Any]:
+        '''Return dict of arguments with key name in include_arguments or all of the arguments when include_arguments is None'''
+        if include_arguments is not None:
+            return {k: self.get_argument(k, default=None)
+                    for k in self.request.arguments
+                    if k in include_arguments}
+        else:
+            return {k: self.get_argument(k, default=None)
+                    for k in self.request.arguments}
