@@ -20,5 +20,8 @@ Read [documentation](https://hyssop.readthedocs.io/en/latest/) for more informat
 
 ## Change log
 
+* **1.0.1 - Sep. 24, 2020**:
+   * Fix bugs.
+
 * **1.0.0 - Aug. 20, 2020**:
    * Initalize project.

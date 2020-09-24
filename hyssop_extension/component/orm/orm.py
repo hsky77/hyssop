@@ -16,7 +16,7 @@ File created: September 4th 2020
             parameter "connection_refresh" is the timer to prevent rapidly reconnect database
 
         component:                                  # component block of server_config.yaml
-            orm_db:                                 # indicate OrmDB Component
+            orm:                                    # indicate OrmDB Component
                 db_id_1:    <str>                   # define string id will be use in code
                     module: <str>                   # required - support 'sqlite', 'sqlite_memory', 'mysql'
                     connections: <int>                   # optional - db access worker limit, default 1
@@ -34,7 +34,7 @@ File created: September 4th 2020
                     ...etc
 
 Modified By: hsky77
-Last Updated: September 17th 2020 14:37:18 pm
+Last Updated: September 24th 2020 21:00:21 pm
 '''
 
 import logging

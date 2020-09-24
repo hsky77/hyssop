@@ -7,7 +7,7 @@
 File created: September 4th 2020
 
 Modified By: hsky77
-Last Updated: September 7th 2020 20:08:24 pm
+Last Updated: September 24th 2020 20:59:41 pm
 '''
 
 from hyssop.web.component import ComponentTypes
@@ -16,7 +16,7 @@ from hyssop.web.config_validator import (WebConfigComponentValidator, ConfigCont
 
 WebConfigComponentValidator.set_cls_parameters(
     ConfigContainerMeta(
-        'orm_db', False,
+        'orm', False,
         ConfigScalableContainerMeta(
             str,
             ConfigSwitchableElementMeta(
@@ -46,4 +46,4 @@ WebConfigComponentValidator.set_cls_parameters(
 
 
 class HyssopExtensionComponentTypes(ComponentTypes):
-    OrmDB = ('orm_db', 'orm', 'OrmDBComponent')
+    OrmDB = ('orm', 'orm', 'OrmDBComponent')

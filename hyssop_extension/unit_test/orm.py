@@ -7,16 +7,16 @@
 File created: September 4th 2020
 
 Modified By: hsky77
-Last Updated: September 5th 2020 20:19:56 pm
+Last Updated: September 24th 2020 21:00:51 pm
 '''
 
 import sys
 import unittest
 import asyncio
-from enum import Enum
+import enum
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, Enum
 from sqlalchemy.orm import Session
 
 from hyssop.unit_test import UnitTestCase, UnitTestServer
@@ -31,7 +31,7 @@ from component.orm import (Entity, OrmExecutor, OrmExecutorFactory, EntityMixin,
 DeclarativeBase = get_declarative_base()
 
 
-class GenderType(Enum):
+class GenderType(enum.Enum):
     Male = 'male'
     Female = 'female'
 
@@ -42,7 +42,7 @@ class TestEntity(DeclarativeBase, EntityMixin):
     id = Column(Integer, primary_key=True)
     name = Column(String(40), nullable=False)
     age = Column(Integer, nullable=False)
-    gender = Column(String(6), nullable=False)
+    gender = Column(Enum(GenderType), nullable=False)
     secret = Column(String(40))
     note = Column(String(100))
     schedule = Column(DateTime, default=datetime.now)
@@ -60,7 +60,7 @@ class OrmTestCase(UnitTestCase):
 
     def test_component(self):
         component_setting = {
-            'orm_db':
+            'orm':
             {
                 'db_1': {
                     'module': 'sqlite_memory',
@@ -76,25 +76,25 @@ class OrmTestCase(UnitTestCase):
         component_manager.invoke(
             DefaultComponentTypes.Logger, 'update_default_logger', False)
 
-        orm_db: OrmDBComponent = component_manager.get_component(
+        orm: OrmDBComponent = component_manager.get_component(
             HyssopExtensionComponentTypes.OrmDB)
 
-        orm_db.init_db_declarative_base('db_1', DeclarativeBase)
+        orm.init_db_declarative_base('db_1', DeclarativeBase)
 
-        with orm_db.get_executor('db_1', TestUW) as executor:
+        with orm.get_executor('db_1', TestUW) as executor:
             entity = executor.add(name='someone', age=50,
-                                  gender='female', secret='my secret', note='this is note')
+                                  gender=GenderType.Female, secret='my secret', note='this is note')
 
             self.assertIsNotNone(entity)
             self.assertEqual(entity.name, 'someone')
             self.assertEqual(entity.age, 50)
-            self.assertEqual(entity.gender, 'female')
+            self.assertEqual(entity.gender, GenderType.Female)
             self.assertEqual(entity.secret, 'my secret')
             self.assertEqual(entity.note, 'this is note')
 
             executor.commit()
 
-        orm_db.dispose(component_manager)
+        orm.dispose(component_manager)
 
     def test_dt(self):
         now = datetime.now().replace(microsecond=0)
@@ -117,21 +117,21 @@ class OrmTestCase(UnitTestCase):
         self.assertIsInstance(sess, Session)
 
         entity = TestUW.add(sess, name='someone', age=30,
-                            gender='male', secret='my secret', note='this is note')
+                            gender=GenderType.Male, secret='my secret', note='this is note')
 
         self.assertEqual(entity.name, 'someone')
         self.assertEqual(entity.age, 30)
-        self.assertEqual(entity.gender, 'male')
+        self.assertEqual(entity.gender, GenderType.Male)
         self.assertEqual(entity.secret, 'my secret')
         self.assertEqual(entity.note, 'this is note')
 
         TestUW.commit(sess)
         TestUW.refresh(sess, entity)
-        TestUW.update(sess, entity, age=50, gender='female')
+        TestUW.update(sess, entity, age=50, gender=GenderType.Female)
 
         self.assertEqual(entity.name, 'someone')
         self.assertEqual(entity.age, 50)
-        self.assertEqual(entity.gender, 'female')
+        self.assertEqual(entity.gender, GenderType.Female)
         self.assertEqual(entity.secret, 'my secret')
         self.assertEqual(entity.note, 'this is note')
 
@@ -164,7 +164,7 @@ class OrmTestCase(UnitTestCase):
 
                 self.assertIsNotNone(entity)
                 self.assertEqual(entity.age, 50)
-                self.assertEqual(entity.gender, 'female')
+                self.assertEqual(entity.gender, GenderType.Female)
                 self.assertEqual(entity.secret, 'my secret')
                 self.assertEqual(entity.note, 'this is note')
 
@@ -179,12 +179,12 @@ class OrmTestCase(UnitTestCase):
     def do_test_factory(self, executor_factory: OrmExecutorFactory):
         with executor_factory.get_executor(TestUW) as executor:
             entity = executor.add(name='someone', age=50,
-                                  gender='female', secret='my secret', note='this is note')
+                                  gender=GenderType.Female, secret='my secret', note='this is note')
 
             self.assertIsNotNone(entity)
             self.assertEqual(entity.name, 'someone')
             self.assertEqual(entity.age, 50)
-            self.assertEqual(entity.gender, 'female')
+            self.assertEqual(entity.gender, GenderType.Female)
             self.assertEqual(entity.secret, 'my secret')
             self.assertEqual(entity.note, 'this is note')
 
@@ -192,12 +192,12 @@ class OrmTestCase(UnitTestCase):
 
         async def test_db_async():
             entity = await executor_factory.run_method_async(TestUW.add, name='someone', age=50,
-                                                             gender='male', secret='my secret', note='this is note')
+                                                             gender=GenderType.Male, secret='my secret', note='this is note')
 
             self.assertIsNotNone(entity)
             self.assertEqual(entity.name, 'someone')
             self.assertEqual(entity.age, 50)
-            self.assertEqual(entity.gender, 'male')
+            self.assertEqual(entity.gender, GenderType.Male)
             self.assertEqual(entity.secret, 'my secret')
             self.assertEqual(entity.note, 'this is note')
 
@@ -205,12 +205,12 @@ class OrmTestCase(UnitTestCase):
 
             async with executor_factory.get_executor(TestUW) as executor:
                 entity = await executor.add_async(name='someone', age=50,
-                                                  gender='female', secret='my secret', note='this is note')
+                                                  gender=GenderType.Female, secret='my secret', note='this is note')
 
                 self.assertIsNotNone(entity)
                 self.assertEqual(entity.name, 'someone')
                 self.assertEqual(entity.age, 50)
-                self.assertEqual(entity.gender, 'female')
+                self.assertEqual(entity.gender, GenderType.Female)
                 self.assertEqual(entity.secret, 'my secret')
                 self.assertEqual(entity.note, 'this is note')
                 await executor.commit_async()
@@ -221,7 +221,7 @@ class OrmTestCase(UnitTestCase):
                     executor.update(entity, age=18)
                     self.assertEqual(entity.name, 'someone')
                     self.assertEqual(entity.age, 18)
-                    self.assertEqual(entity.gender, 'female')
+                    self.assertEqual(entity.gender, GenderType.Female)
                     self.assertEqual(entity.secret, 'my secret')
                     self.assertEqual(entity.note, 'this is note')
                     executor.flush()
@@ -231,7 +231,7 @@ class OrmTestCase(UnitTestCase):
                     executor.refresh(entity)
                     self.assertEqual(entity.name, 'someone')
                     self.assertEqual(entity.age, 50)
-                    self.assertEqual(entity.gender, 'female')
+                    self.assertEqual(entity.gender, GenderType.Female)
                     self.assertEqual(entity.secret, 'my secret')
                     self.assertEqual(entity.note, 'this is note')
 
@@ -242,14 +242,14 @@ class OrmTestCase(UnitTestCase):
                     self.assertIsNotNone(entity)
                     self.assertEqual(entity.name, 'someone')
                     self.assertEqual(entity.age, 50)
-                    self.assertEqual(entity.gender, 'female')
+                    self.assertEqual(entity.gender, GenderType.Female)
                     self.assertEqual(entity.secret, 'my secret')
                     self.assertEqual(entity.note, 'this is note')
 
                     await executor.update(entity, age=18)
                     self.assertEqual(entity.name, 'someone')
                     self.assertEqual(entity.age, 18)
-                    self.assertEqual(entity.gender, 'female')
+                    self.assertEqual(entity.gender, GenderType.Female)
                     self.assertEqual(entity.secret, 'my secret')
                     self.assertEqual(entity.note, 'this is note')
 
@@ -259,17 +259,17 @@ class OrmTestCase(UnitTestCase):
                     await executor.refresh_async(entity)
                     self.assertEqual(entity.name, 'someone')
                     self.assertEqual(entity.age, 50)
-                    self.assertEqual(entity.gender, 'female')
+                    self.assertEqual(entity.gender, GenderType.Female)
                     self.assertEqual(entity.secret, 'my secret')
                     self.assertEqual(entity.note, 'this is note')
 
         entity = executor_factory.run_method(TestUW.add, name='someone', age=50,
-                                             gender='male', secret='my secret', note='this is note')
+                                             gender=GenderType.Male, secret='my secret', note='this is note')
 
         self.assertIsNotNone(entity)
         self.assertEqual(entity.name, 'someone')
         self.assertEqual(entity.age, 50)
-        self.assertEqual(entity.gender, 'male')
+        self.assertEqual(entity.gender, GenderType.Male)
         self.assertEqual(entity.secret, 'my secret')
         self.assertEqual(entity.note, 'this is note')
 
