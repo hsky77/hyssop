@@ -7,7 +7,7 @@
 File created: August 21st 2020
 
 Modified By: hsky77
-Last Updated: September 1st 2020 10:59:23 am
+Last Updated: October 1st 2020 21:45:14 pm
 '''
 
 
@@ -136,8 +136,8 @@ class HyssopServer():
                 contact = settings['doc'].get('contact', contact)
 
             from tornado_swagger.setup import setup_swagger
-            controllers = [url(route, c, name=c.__name__)
-                           for route, c, _ in controllers]
+            controllers = [url(route, c, kwargs, name=c.__name__)
+                           for route, c, kwargs in controllers]
             setup_swagger(controllers, description=description,
                           api_version=api_version, title=title, contact=contact, swagger_url=api_route)
 
