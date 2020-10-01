@@ -7,13 +7,14 @@
 File created: August 20th 2020
 
 Modified By: hsky77
-Last Updated: September 2nd 2020 13:10:29 pm
+Last Updated: October 1st 2020 21:01:27 pm
 '''
 
 import os
 import math
 import asyncio
 import cgi
+import re
 from typing import Any, Dict, Union
 
 from tornado.ioloop import IOLoop
@@ -152,3 +153,43 @@ class StreamingFileUploadController(StreamingUploadController):
                 LocalCode_Upload_Success, self.filename))
             self.write(self.component_localization.get_message(
                 LocalCode_Upload_Success, self.filename))
+
+
+class ReservedProxyController(RequestController):
+    SUPPORTED_METHODS = ("GET", "HEAD", "POST", "DELETE",
+                         "PATCH", "PUT", "OPTIONS")
+
+    def initialize(self, target: str,  not_allow: Dict = None):
+        self.target = target
+        self.not_allow = not_allow
+
+    async def get(self, route): await self.__proxy(route)
+    async def post(self, route): await self.__proxy(route)
+    async def put(self, route): await self.__proxy(route)
+    async def delete(self, route): await self.__proxy(route)
+    async def patch(self, route): await self.__proxy(route)
+    async def options(self, route): await self.__proxy(route)
+    async def head(self, route): await self.__proxy(route)
+
+    async def __proxy(self, route):
+        if self.not_allow:
+            rs = [x for x in self.not_allow if re.match(x, route)]
+            for r in rs:
+                if self.not_allow[r] and self.request.method.lower() in self.not_allow[r]:
+                    self.set_status(405)
+                    return
+                elif not self.not_allow[r]:
+                    self.set_status(405)
+                    return
+
+        url = '{}/{}?{}'.format(self.target, route, self.request.query)
+        cookies = {k: v.output() for k, v in self.cookies.items()}
+        response = await self.component_services.invoke_async(
+            url, self.request.method, data=self.request.body, headers=self.request.headers, cookies=cookies)
+
+        self.set_status(response.status_code)
+        for key in response.headers:
+            self.set_header(key, response.headers[key])
+        for key in response.cookies:
+            self.set_cookie(key, response.cookies[key])
+        self.write(response.content)
