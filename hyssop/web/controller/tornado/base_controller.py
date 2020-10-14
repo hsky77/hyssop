@@ -7,7 +7,7 @@
 File created: August 20th 2020
 
 Modified By: hsky77
-Last Updated: October 1st 2020 21:01:27 pm
+Last Updated: October 1st 2020 21:53:41 pm
 '''
 
 import os
@@ -185,7 +185,7 @@ class ReservedProxyController(RequestController):
         url = '{}/{}?{}'.format(self.target, route, self.request.query)
         cookies = {k: v.output() for k, v in self.cookies.items()}
         response = await self.component_services.invoke_async(
-            url, self.request.method, data=self.request.body, headers=self.request.headers, cookies=cookies)
+            url, self.request.method.lower(), data=self.request.body, headers=self.request.headers, cookies=cookies)
 
         self.set_status(response.status_code)
         for key in response.headers:

@@ -7,15 +7,19 @@
 File created: August 21st 2020
 
 Modified By: hsky77
-Last Updated: September 5th 2020 23:18:04 pm
+Last Updated: October 5th 2020 19:59:51 pm
 '''
 
+import os
 import shutil
 import setuptools
 from hyssop import Version, __name__
 
-shutil.rmtree('dist')
-shutil.rmtree('build')
+if os.path.isdir('dist'):
+    shutil.rmtree('dist')
+
+if os.path.isdir('build'):
+    shutil.rmtree('build')
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
