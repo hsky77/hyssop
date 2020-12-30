@@ -7,9 +7,10 @@
 File created: September 4th 2020
 
 Modified By: howardlkung
-Last Updated: December 27th 2020 17:54:26 pm
+Last Updated: December 30th 2020 11:18:38 am
 '''
 
+from uuid import UUID
 from asyncio import Lock
 from types import TracebackType
 from typing import Dict, List, Any, Tuple, Type, Union, Optional, AsyncGenerator
@@ -159,19 +160,37 @@ class SQLAlchemyEntityMixin():
     def relationships(cls):
         return inspect(cls).relationships.items()
 
+    @classmethod
+    def filter_key_values(cls, **kwargs) -> Dict[str, Any]:
+        """Get entity values contains columns in dict"""
+        column_names = [c.name for c in cls.columns()]
+        return {k: v for k, v in kwargs.items() if k in column_names}
+
+    @classmethod
+    def filter_primary_key_values(cls, **kwargs) -> Dict[str, Any]:
+        """Get entity values contains primary key columns in dict"""
+        column_names = [c.name for c in cls.primary_keys()]
+        return {k: v for k, v in kwargs.items() if k in column_names}
+
+    @classmethod
+    def filter_non_primary_key_values(cls, **kwargs) -> Dict[str, Any]:
+        """Get entity values contains non-primary key columns in dict"""
+        column_names = [c.name for c in cls.non_primary_keys()]
+        return {k: v for k, v in kwargs.items() if k in column_names}
+
     @property
     def key_values(self) -> Dict[str, Any]:
-        """Get dict contains columns"""
+        """Get entity values contains columns in dict"""
         return {k.name: getattr(self, k.name) for k in self.columns()}
 
     @property
     def primary_key_values(self) -> Dict[str, Any]:
-        """Get dict contains primary key columns"""
+        """Get entity values contains primary key columns in dict"""
         return {k.name: getattr(self, k.name) for k in self.primary_keys()}
 
     @property
     def non_primary_key_values(self, **kwargs) -> Dict[str, Any]:
-        """Get dict contains non-primary key columns"""
+        """Get entity values contains non-primary key columns in dict"""
         return {k.name: getattr(self, k.name) for k in self.non_primary_keys()}
 
     def to_json_dict(self) -> Dict[str, Any]:
@@ -640,13 +659,15 @@ class AsyncEntityUW():
                 kwargs[column.name] = column.default.arg() if callable(
                     column.default.arg) else column.default.arg
 
+                if isinstance(kwargs[column.name], UUID):
+                    kwargs[column.name] = kwargs[column.name].hex
+
         id = await cursor.execute(self._entity_cls.table().insert().values(**kwargs))
-        return await self.load(cursor, id=id) if id else None
+        return await self.load(cursor, **self._entity_cls.filter_primary_key_values(**kwargs)) if id else None
 
     async def merge(self, cursor: AsyncCursorProxy, **kwargs) -> SQLAlchemyEntityMixin:
         """Insert or replace one entity."""
-        pks = {k.name: kwargs[k.name]
-               for k in self._entity_cls.primary_keys() if k.name in kwargs}
+        pks = self._entity_cls.filter_primary_key_values(**kwargs)
         if len(pks) > 0:
             entity = await self.load(cursor, **pks)
             if entity:
