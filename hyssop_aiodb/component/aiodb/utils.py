@@ -7,7 +7,7 @@
 File created: September 4th 2020
 
 Modified By: howardlkung
-Last Updated: December 30th 2020 11:18:38 am
+Last Updated: December 30th 2020 14:39:38 pm
 '''
 
 from uuid import UUID
@@ -15,7 +15,7 @@ from asyncio import Lock
 from types import TracebackType
 from typing import Dict, List, Any, Tuple, Type, Union, Optional, AsyncGenerator
 import enum
-from datetime import datetime
+from datetime import datetime, date
 
 from sqlalchemy.dialects.sqlite import pysqlite
 from sqlalchemy.dialects.mysql import pymysql
@@ -599,6 +599,8 @@ class AsyncEntityUW():
     def value_type_convert(self, t: type, v: Any):
         if t is datetime:
             return str_to_datetime(v)
+        if t is date:
+            return str_to_datetime(v).date()
         elif issubclass(t, enum.IntEnum):
             return t(int(v))
         else:
@@ -650,7 +652,6 @@ class AsyncEntityUW():
 
     async def add(self, cursor: AsyncCursorProxy, **kwargs) -> SQLAlchemyEntityMixin:
         """Insert one entity"""
-        self._check_allow_to_update(kwargs)
         kwargs = self.convert_value_type(**kwargs)
 
         # set default values
@@ -679,7 +680,7 @@ class AsyncEntityUW():
 
     async def update(self, cursor: AsyncCursorProxy, entity: SQLAlchemyEntityMixin, **kwargs) -> None:
         """Update entity non primary key values"""
-        if len(kwargs) > 0:
+        if entity and len(kwargs) > 0:
             self._check_allow_to_update(kwargs)
             kwargs = self.convert_value_type(**kwargs)
 
@@ -701,7 +702,7 @@ class AsyncEntityUW():
         for k in kwargs:
             if k in self._entity_cls.Not_Allow_Update_Columns:
                 raise KeyError(BaseLocal.get_message(
-                    LocalCode_Not_Allow_Update))
+                    LocalCode_Not_Allow_Update, k))
 
     # async def delete_relationship_entity(self, cursor: AsyncCursorProxy, entity: SQLAlchemyEntityMixin, target_property_name: str = None):
     #     dt = entity.relationships()
