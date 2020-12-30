@@ -27,7 +27,7 @@ This module contains the "yaml" configurable component classes for hyssop applic
 
         2. in "foo.py" contains the class code:
 
-            from hyssop.web.component import Component, ComponentManager
+            from hyssop.project.component import Component, ComponentManager
             from . import ComponentExtension
 
             class Foo(Component):
@@ -44,16 +44,16 @@ This module contains the "yaml" configurable component classes for hyssop applic
                     p1: xxxx        # parameter p1 of Foo.init()
 
 Modified By: hsky77
-Last Updated: September 13th 2020 21:14:06 pm
+Last Updated: November 22nd 2020 12:23:06 pm
 '''
 
 from typing import Dict, List, Union
 
 from .base import ComponentTypes, Component, ComponentManager
 from ...util import BaseLocal
-from .. import LocalCode_Component_Duplicated_Key, LocalCode_Failed_To_Load_Component
+from ..constants import LocalCode_Component_Duplicated_Key, LocalCode_Failed_To_Load_Component
 
-from ..config_validator import WebConfigComponentValidator
+from .config import ConfigComponentValidator
 
 
 class DefaultComponentTypes(ComponentTypes):
@@ -63,10 +63,9 @@ class DefaultComponentTypes(ComponentTypes):
     Logger = ['logger', 'default', 'LoggerComponent']
     Callback = ('callback', 'default', 'CallbackComponent')
     Executor = ('executor', 'default', 'ExecutorComponent')
-    Service = ('services', 'default', 'ServicesComponent')
 
 
-def __create_optional_components(component_manager: ComponentManager, component_settings: Dict, component_types: ComponentTypes, root_dir: str) -> None:
+def __create_optional_components(component_manager: ComponentManager, component_settings: Dict, component_types: ComponentTypes, project_dir: str) -> None:
     for key in component_settings:
         for component_type in component_types:
             comp_type = None
@@ -92,10 +91,10 @@ def __create_optional_components(component_manager: ComponentManager, component_
             component_manager.invoke(comp_type, 'init',
                                      component_manager,
                                      **(component_settings[comp_type.enum_key] or {}),
-                                     root_dir=root_dir)
+                                     project_dir=project_dir)
 
 
-def create_server_component_manager(component_settings: Union[Dict, None], root_dir: str) -> ComponentManager:
+def create_component_manager(project_dir: str, component_settings: Union[Dict, None] = None) -> ComponentManager:
     component_manager = ComponentManager()
 
     # default components
@@ -109,17 +108,17 @@ def create_server_component_manager(component_settings: Union[Dict, None], root_
             component_manager.invoke(default_type, 'init',
                                      component_manager,
                                      **(component_settings[default_type.enum_key] or {}),
-                                     root_dir=root_dir)
+                                     project_dir=project_dir)
         else:
             component_manager.invoke(
-                default_type, 'init', component_manager, root_dir=root_dir)
+                default_type, 'init', component_manager, project_dir=project_dir)
 
     sort_types = [DefaultComponentTypes]
     # extensions
     ext_comp_types = ComponentTypes.get_component_enum_class()
 
     # validate config
-    WebConfigComponentValidator(component_settings)
+    ConfigComponentValidator(component_settings)
 
     if ext_comp_types is not None:
         sort_types = ext_comp_types + \
@@ -141,7 +140,7 @@ def create_server_component_manager(component_settings: Union[Dict, None], root_
 
         if component_settings:
             __create_optional_components(
-                component_manager, component_settings, ext_comp_types, root_dir)
+                component_manager, component_settings, ext_comp_types, project_dir)
 
     # check componet load failed
     if component_settings:
@@ -152,7 +151,7 @@ def create_server_component_manager(component_settings: Union[Dict, None], root_
                     checked = True
             if not checked:
                 raise ImportError(BaseLocal.get_message(
-                    LocalCode_Failed_To_Load_Component, root_dir, key))
+                    LocalCode_Failed_To_Load_Component, project_dir, key))
 
     # sort with enums order
     component_manager.sort_components(sort_types)
@@ -163,7 +162,3 @@ def create_server_component_manager(component_settings: Union[Dict, None], root_
 def add_module_default_logger(logger_names: List[str]) -> None:
     from .default import LoggerComponent
     LoggerComponent.default_loggers = LoggerComponent.default_loggers + logger_names
-
-
-def get_default_component_manager(root_dir: str):
-    return create_server_component_manager(None, root_dir)

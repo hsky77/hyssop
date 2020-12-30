@@ -1,8 +1,6 @@
 code,en
-100,stopping application
-101,application stoped
-102,{} is not the subclass of {}
-103,file {} is not found
+100,{} is not the subclass of {}
+101,file {} is not found
 110,{} requires parameter {}
 111,"{} parameter {} type error, {} is not {}"
 112,HierarchyElementMeta does not setup properly: {}

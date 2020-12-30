@@ -9,7 +9,7 @@ File created: August 21st 2020
 This module defines the base component classes
 
 Modified By: hsky77
-Last Updated: September 3rd 2020 18:59:25 pm
+Last Updated: November 22nd 2020 00:42:05 am
 '''
 
 
@@ -17,7 +17,7 @@ from typing import Dict, Tuple, Any, Union, List
 from inspect import iscoroutinefunction
 
 from ...util import DynamicTypeEnum, BaseLocal
-from .. import LocalCode_Not_Subclass, LocalCode_Component_Type_Not_Exist, Component_Module_Folder
+from ..constants import LocalCode_Not_Subclass, LocalCode_Component_Type_Not_Exist, Component_Module_Folder
 
 
 class ComponentTypes(DynamicTypeEnum):
@@ -70,7 +70,7 @@ class ComponentManager():
         return info
 
     async def dispose_components(self) -> None:
-        await self.boardcast_async('dispose', self)
+        return await self.boardcast_async('dispose', self)
 
     def boardcast(self, method: str, *arugs, **kwargs) -> List[Tuple[ComponentTypes, Any]]:
         """

@@ -7,7 +7,7 @@
 File created: August 20th 2020
 
 Modified By: hsky77
-Last Updated: August 27th 2020 15:21:27 pm
+Last Updated: November 22nd 2020 20:41:28 pm
 '''
 
 
@@ -17,9 +17,8 @@ import sys
 from typing import List, Set, ByteString, Tuple
 
 from hyssop.util import walk_to_file_paths, join_path, configure_colored_logging
-from hyssop.web.server import HyssopServer
 
-from . import Dependency_Folder, Hyssop_Web_Pack_File, Hyssop_Web_Requirement_File
+from .constants import Dependency_Folder, Project_Pack_File, Project_Requirement_File
 
 
 class HyssopPack(object):
@@ -81,7 +80,7 @@ class HyssopPack(object):
         hyssop_exclude = self.default_exclude_keys
         for directory in [server_folder]:
             sub_paths = set()
-            pack_list = join_path(directory, Hyssop_Web_Pack_File)
+            pack_list = join_path(directory, Project_Pack_File)
             if os.path.isfile(pack_list):
                 with open(pack_list, 'r') as f:
                     config = yaml.load(f, Loader=yaml.SafeLoader)
@@ -120,7 +119,7 @@ class HyssopPack(object):
                     [p.find(x) for x in hyssop_exclude]) == -1])
 
             requirement_paths.add(
-                join_path(directory, Hyssop_Web_Requirement_File))
+                join_path(directory, Project_Requirement_File))
 
         return paths, py_paths, requirement_paths
 
@@ -193,6 +192,7 @@ class HyssopPack(object):
 
     def __get_compiled_py_bytecode(self, path: str) -> ByteString:
         import importlib
+        import sys
         print('compiling and packing python file: {}'.format(path))
         loader = importlib.machinery.SourceFileLoader(
             '<hyssop_compiled>', path)
@@ -200,6 +200,10 @@ class HyssopPack(object):
         code = compile(source_bytes, path,
                        'exec', dont_inherit=True)
         source_stats = loader.path_stats(path)
-        bytecode = importlib._bootstrap_external._code_to_bytecode(
-            code, source_stats['mtime'], source_stats['size'])
+        if sys.version_info.minor < 7:
+            bytecode = importlib._bootstrap_external._code_to_bytecode(
+                code, source_stats['mtime'], source_stats['size'])
+        else:
+            bytecode = importlib._bootstrap_external._code_to_timestamp_pyc(
+                code, source_stats['mtime'], source_stats['size'])
         return bytecode

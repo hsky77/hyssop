@@ -4,7 +4,7 @@
 # the MIT License: http://www.opensource.org/licenses/mit-license.php:
 
 '''
-server loads all default components in hyssop.web.component.DefaultComponentTypes when starting
+server loads all default components in hyssop.project.component.DefaultComponentTypes when starting
 
     LocalizationComponent:
 
@@ -37,31 +37,14 @@ server loads all default components in hyssop.web.component.DefaultComponentType
             executor:
                 worker_count: 1      # The maximum of workers is 2
 
-    ServicesComponent:
-
-        - managing url route and service apis and provide inovke methons:
-
-        component:
-            services:
-                async_connection_limit:             <int>   # the connections limitation in async mode
-                async_connection_limit_pre_host:    <int>   # the connections limitation of each host in async mode
-                routes:
-                    url:                            <str>
-                        name:   api_route           <str>
-                    url:                            <str>
-                        etc...
-
-Last Updated: September 4th 2020 14:27:50 pm
+Last Updated: November 22nd 2020 14:48:31 pm
 '''
 
 import logging
-import requests
 
 from datetime import datetime
 from enum import Enum
 from typing import Callable, Any, List, Dict, ByteString
-
-from aiohttp import ClientResponse, TCPConnector, ClientSession
 
 from . import Component, ComponentManager, ComponentTypes
 from ...util import ExecutorFactory, Executor, Callbacks, configure_colored_logging, join_path, BaseSyncLogger
@@ -78,7 +61,7 @@ class LocalizationComponent(Component):
 
         self.dir = kwargs.get('dir', None)
         if self.dir is not None:
-            self.dir = join_path(kwargs.get('root_dir', ''), self.dir)
+            self.dir = join_path(kwargs.get('project_dir', ''), self.dir)
             self.local.import_csvs_from_directory(self.dir)
 
         if lang is not None:
@@ -225,100 +208,3 @@ class ExecutorComponent(Component):
     def dispose(self, component_manager: ComponentManager) -> None:
         self.disposing = True
         self.executor_factory.dispose()
-
-
-class ServicesComponent(Component):
-    """default component for managing url route and service apis"""
-
-    STREAMING_CHUNK_SIZE = 8192
-
-    @property
-    def async_client(self) -> ClientSession:
-        if not hasattr(self, 'aclient'):
-            self.aclient = ClientSession(connector=TCPConnector(
-                limit=self.async_connection_limit, limit_per_host=self.async_connection_limit_pre_host))
-        return self.aclient
-
-    def init(self, component_manager: ComponentManager, **kwargs) -> None:
-        self.async_connection_limit = kwargs.get('async_connection_limit', 30)
-        self.async_connection_limit_pre_host = kwargs.get(
-            'async_connection_limit_pre_host', 10)
-
-        self.routes = {}
-        routes = kwargs.get('routes', {})
-        for url, apis in routes.items():
-            for name, api in apis.items():
-                self.routes[name] = '{}{}'.format(url, api)
-
-    def invoke(self,
-               service_name_or_url: str,
-               method: str = 'get',
-               sub_route: str = '',
-               streaming_callback: Callable = None,
-               chunk_size: int = STREAMING_CHUNK_SIZE,
-               **kwargs) -> requests.Response:
-        """
-        This function wraps requests.request(). That means this function accepts the same parameters as requests.request()
-
-        Note: 
-            use params= {} to send query parameters when method is 'get' or 'delete'
-            use data= {} to send body parameters when method is the others
-        """
-        url = self.routes[service_name_or_url] if service_name_or_url in self.routes else service_name_or_url
-
-        if not sub_route == '' and not sub_route == None:
-            url = '{}/{}'.format(url, sub_route)
-
-        if callable(streaming_callback):
-            with requests.request(method, url, stream=True, **kwargs) as response:
-                response.raise_for_status()
-                for chunk in response.iter_content(chunk_size=chunk_size):
-                    streaming_callback(chunk)
-                return response
-        else:
-            return requests.request(method, url, **kwargs)
-
-    async def invoke_async(self,
-                           service_name_or_url: str,
-                           method: str = 'get',
-                           sub_route: str = '',
-                           streaming_callback: Callable[[bytes], None] = None,
-                           chunk_size: int = STREAMING_CHUNK_SIZE,
-                           **kwargs) -> requests.Response:
-        """
-        This function wraps aiohttp.ClientSession.request(). That means this function accepts the same parameters as aiohttp.ClientSession.request().
-        The returned response is requests.Response to allow the similar usage of the response instance as self.invoke()
-
-        Note: 
-            use params= {} to send query parameters when method is 'get' or 'delete'
-            use data= {} to send body parameters when method is the others
-        """
-
-        url = self.routes[service_name_or_url] if service_name_or_url in self.routes else service_name_or_url
-
-        if not sub_route == '' and not sub_route == None:
-            url = '{}/{}'.format(url, sub_route)
-
-        result = requests.Response()
-        dt = datetime.now()
-        if callable(streaming_callback):
-            async with self.async_client.request(method, url, **kwargs) as response:
-                async for chunk in response.content.iter_chunked(chunk_size):
-                    streaming_callback(chunk)
-        else:
-            async with self.async_client.request(method, url, **kwargs) as response:
-                result._content = await response.read()
-
-        result.status_code = response.status
-        result.url = str(response.real_url)
-        result.headers = {k: v for k, v in response.headers.items()}
-        result.cookies = response.cookies
-        result.history = response.history
-        result.elapsed = datetime.now() - dt
-        result.encoding = response.get_encoding()
-        result.request = response.request_info
-        return result
-
-    async def dispose(self, component_manager: ComponentManager):
-        if hasattr(self, 'aclient') and self.aclient:
-            await self.aclient.close()

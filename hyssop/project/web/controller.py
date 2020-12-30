@@ -19,14 +19,14 @@ This module contains the "yaml" configurable controller classes for hyssop appli
                     foo.py
 
         1. "__init__.py" defines the controllers:
-            from hyssop.web.controller import ControllerType
+            from hyssop.project.web.controller import ControllerType
 
             class ExControllerType(ControllerType):
                 Foo = ('foo', 'foo', 'Foo')
 
         2. "foo.py" contains the controller class:
 
-            from hyssop.web.controller.tornado import RequestController
+            from hyssop.project.web.controller.tornado import RequestController
 
             class Foo(RequestController):
 
@@ -45,32 +45,27 @@ This module contains the "yaml" configurable controller classes for hyssop appli
                         p1: xxxx        # parameter p1 of Foo.initialize()
 
 Modified By: hsky77
-Last Updated: September 1st 2020 14:53:09 pm
+Last Updated: November 22nd 2020 14:19:18 pm
 '''
 
 from typing import List, Dict
 
-from .. import LocalCode_Failed_To_Load_Controller
-from ...util import join_path, BaseLocal
-from .base import ControllerType
-from ..config_validator import WebConfigControllerValidator
+from ...util import join_path, join_to_abs_path, BaseLocal, DynamicTypeEnum
+from ..constants import Controller_Module_Folder, LocalCode_Failed_To_Load_Controller
+from .config import ConfigControllerValidator
 
 
-class DefaultControllerType(ControllerType):
-    Frontend = ('frontend', 'tornado.web', 'StaticFileHandler')
+class ControllerType(DynamicTypeEnum):
+    """base abstract controller enum class"""
+    @staticmethod
+    def get_controller_enum_class() -> List[DynamicTypeEnum]:
+        try:
+            return DynamicTypeEnum.get_dynamic_class_enum_class(Controller_Module_Folder)
+        except:
+            pass
 
 
-class UnitTestControllerType(ControllerType):
-    TestController = (
-        'test_api', 'tornado.unittest_controller', 'TestController')
-    TestStreamDownloadController = (
-        'test_download', 'tornado.unittest_controller', 'TestStreamDownloadController')
-    TestWebsocketController = (
-        'test_socket', 'tornado.unittest_controller', 'TestWebsocketController')
-    TestStreamUploadController = (
-        'test_bytes_upload', 'tornado.unittest_controller', 'TestStreamUploadController')
-
-def _get_controller_enum(key: str, contoller_types: List[ControllerType]):
+def _get_controller_enum(key: str, contoller_types: List[ControllerType]) -> DynamicTypeEnum:
     for contoller_type in contoller_types:
         try:
             return contoller_type(key)
@@ -78,21 +73,17 @@ def _get_controller_enum(key: str, contoller_types: List[ControllerType]):
             continue
 
 
-def get_controllers(server_setting: Dict, server_dir: str = None) -> List:
-    from tornado.web import StaticFileHandler
-    from .. import Controller_Module_Folder
+def get_project_controllers(server_setting: Dict, server_dir: str = None) -> List:
     controllers = []
     if Controller_Module_Folder in server_setting and isinstance(server_setting[Controller_Module_Folder], dict):
-        contoller_types = [DefaultControllerType, UnitTestControllerType]
+        contoller_types = []
         try:
-            extend_controller_type = ControllerType.get_controller_enum_class()
-            contoller_types = extend_controller_type + \
-                contoller_types if extend_controller_type else contoller_types
+            contoller_types = ControllerType.get_controller_enum_class()
         except:
             pass
 
         # validate controller config
-        WebConfigControllerValidator(server_setting[Controller_Module_Folder])
+        ConfigControllerValidator(server_setting[Controller_Module_Folder])
 
         for path, v in server_setting[Controller_Module_Folder].items():
             if 'enum' in v:
@@ -100,14 +91,13 @@ def get_controllers(server_setting: Dict, server_dir: str = None) -> List:
                 if t is None:
                     raise ImportError(BaseLocal.get_message(
                         LocalCode_Failed_To_Load_Controller, server_dir, v['enum']))
-                cls_type = t.import_class()
+                try:
+                    cls_type = t.import_class()
+                except:
+                    cls_type = t.import_function()
 
                 params = v['params'] if 'params' in v and v['params'] is not None else {}
-                if issubclass(cls_type, StaticFileHandler):
-                    server_setting['static_handler_class'] = cls_type
-                    if 'path' in params:
-                        params['path'] = join_path(server_dir, params['path'])
 
                 controllers.append((path, cls_type, params))
 
-    return controllers, server_setting
+    return controllers

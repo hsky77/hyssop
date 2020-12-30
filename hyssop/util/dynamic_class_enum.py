@@ -7,7 +7,7 @@
 File created: August 21st 2020
 
 Modified By: hsky77
-Last Updated: August 27th 2020 12:37:50 pm
+Last Updated: December 27th 2020 06:40:42 am
 '''
 
 
@@ -118,7 +118,7 @@ class DynamicTypeEnum(Enum, metaclass=DynamicTypeEnumMeta):
     @staticmethod
     def get_dynamic_class_enum_class(module_dir: str) -> List[Enum]:
         from importlib import import_module
-        from inspect import ismodule
+        from inspect import isclass
         m = import_module(module_dir)
-        return [cls for cls in [getattr(m, k) for k in dir(m) if not k.startswith('__')] if (
-            not ismodule(cls) and issubclass(cls, DynamicTypeEnum) and not cls is DynamicTypeEnum)]
+        return [cls for cls in [getattr(m, k) for k in dir(m)] if isclass(
+            cls) and issubclass(cls, DynamicTypeEnum)]

@@ -7,7 +7,7 @@
 File created: August 21st 2020
 
 Modified By: hsky77
-Last Updated: September 4th 2020 14:12:17 pm
+Last Updated: November 21st 2020 21:35:38 pm
 '''
 
 from typing import Dict, List, Type, Any, Tuple, Union, Iterable
@@ -15,9 +15,9 @@ from typing import Dict, List, Type, Any, Tuple, Union, Iterable
 from enum import Enum
 
 from ..util import HierarchyElementMeta, LocalCode_No_Parameters, LocalCode_Parameters_No_Key, BaseLocal
-from .constants import Component_Module_Folder, Controller_Module_Folder
-from . import (LocalCode_Parameter_Required, LocalCode_Parameter_Type_Error, LocalCode_Setup_Error,
-               LocalCode_Invalid_Parameter, LocalCode_Copied_Name_Equal_To_Origin)
+
+from .constants import (LocalCode_Parameter_Required, LocalCode_Parameter_Type_Error, LocalCode_Setup_Error,
+                        LocalCode_Invalid_Parameter, LocalCode_Copied_Name_Equal_To_Origin)
 
 
 class ConfigElementType(Enum):
@@ -200,55 +200,8 @@ class ConfigSwitchableElementMeta(ConfigBaseElementMeta):
         return new_cls
 
 
-WebConfigRootValidator = ConfigContainerMeta(
+ProjectConfigValidator = ConfigContainerMeta(
     'root', True,
     ConfigElementMeta('name', str, False),
-    ConfigElementMeta('port', int, False),
-    ConfigElementMeta('debug', bool, True),
-    ConfigContainerMeta(
-        'ssl', False,
-        ConfigElementMeta('crt', str, True),
-        ConfigElementMeta('key', str, True),
-        ConfigElementMeta('ca', str, False)
-    )
+    ConfigElementMeta('debug', bool, True)
 )
-
-WebConfigComponentValidator = ConfigContainerMeta(
-    Component_Module_Folder, False,
-    ConfigContainerMeta(
-        'localization', False,
-        ConfigElementMeta('dir', str, False),
-        ConfigElementMeta('lang', str, False)
-    ),
-    ConfigContainerMeta(
-        'logger', False,
-        ConfigElementMeta('dir', str, False)
-    ),
-    ConfigContainerMeta(
-        'executor', False,
-        ConfigElementMeta('worker_count', int, True)
-    ),
-    ConfigContainerMeta(
-        'services', False,
-        ConfigElementMeta('async_connection_limit', int, False),
-        ConfigElementMeta('async_connection_limit_pre_host', int, False),
-        ConfigContainerMeta('routes', False,
-                            ConfigScalableElementMeta(str, str)
-                            )
-    ),
-)
-
-WebConfigControllerValidator = ConfigContainerMeta(
-    Controller_Module_Folder, False,
-    ConfigScalableContainerMeta(
-        str,
-        ConfigElementMeta('enum', str, True),
-        ConfigContainerMeta('params', False)
-    )
-)
-
-WebConfigValidator = WebConfigRootValidator.copy('')
-WebConfigValidator.set_cls_parameters(
-    WebConfigComponentValidator)
-WebConfigValidator.set_cls_parameters(
-    WebConfigControllerValidator)

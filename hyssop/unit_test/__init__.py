@@ -8,7 +8,7 @@ File created: August 21st 2020
 
 provide basic python unittest.TestSuite of the following test cases:
     - hyssop.util, worker, and executor
-    - hyssop.web config validation, components and controllers
+    - hyssop.project.web config validation, components and controllers
 
 use get_test_suite() to get the default or extend test suite by inheriting "hyssop.unit_test.UnitTestTypes."
 
@@ -43,18 +43,17 @@ Usage:
             to test all the extend test cases defined in "__init__.py"
 
 Modified By: hsky77
-Last Updated: September 4th 2020 14:14:56 pm
+Last Updated: November 22nd 2020 12:23:32 pm
 '''
 
 import unittest
 
-from .base import UnitTestTypes, UnitTestCase, UnitTestServer
+from .base import UnitTestTypes, UnitTestCase
 
 
 class DefaultUnitTestTypes(UnitTestTypes):
     TestUtil = ('test_util', 'util', 'UtilTestCase')
     TestWorker = ('test_worker', 'util_worker', 'WorkerTestCase')
-    TestWeb = ('test_web', 'web', 'WebTestCase')
 
 
 def get_test_suite() -> unittest.TestSuite:

@@ -7,17 +7,8 @@
 File created: August 21st 2020
 
 Modified By: hsky77
-Last Updated: September 4th 2020 14:12:07 pm
+Last Updated: November 21st 2020 20:52:41 pm
 '''
-
-from .. import Module_Path
-
-Hyssop_Folder = Module_Path
-
-KB = 1024
-MB = 1024 * KB
-GB = 1024 * MB
-TB = 1024 * GB
 
 # reserved folder names
 Component_Module_Folder = 'component'
@@ -27,17 +18,15 @@ Dependency_Folder = 'dependency'
 
 # reserved file names
 Localization_File = 'local.csv'
-Hyssop_Web_Config_File = 'server_config.yaml'
-Hyssop_Web_Pack_File = 'pack.yaml'
-Hyssop_Web_Requirement_File = 'requirements.txt'
+Project_Config_File = 'project_config.yml'
+Project_Pack_File = 'pack.yml'
+Project_Requirement_File = 'requirements.txt'
 
-# server
-LocalCode_Application_Closing = 100
-LocalCode_Application_Closed = 101
-LocalCode_Not_Subclass = 102
-LocalCode_File_Not_Found = 124
+# project
+LocalCode_Not_Subclass = 100
+LocalCode_File_Not_Found = 101
 
-# server config
+# project config
 LocalCode_Parameter_Required = 110
 LocalCode_Parameter_Type_Error = 111
 LocalCode_Setup_Error = 112
