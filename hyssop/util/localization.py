@@ -6,8 +6,8 @@
 '''
 File created: August 21st 2020
 
-Modified By: hsky77
-Last Updated: September 4th 2020 21:38:05 pm
+Modified By: howardlkung
+Last Updated: December 30th 2020 12:17:41 pm
 '''
 
 
@@ -98,8 +98,7 @@ class Localization():
             try:
                 return self.__mapping[code][self.__lang].format(*strings)
             except:
-                raise IndexError(
-                    self.__mapping[LocalCode_Message_Format_Invalid][self.__lang].format(code, strings))
+                return self.__mapping[str(LocalCode_Message_Format_Invalid)][self.__lang].format(code, strings)
         else:
             return self.__mapping[self.default_code][self.__lang].format(self.__lang, code)
 
