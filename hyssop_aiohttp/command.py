@@ -7,7 +7,7 @@
 File created: November 21st 2020
 
 Modified By: hsky77
-Last Updated: December 26th 2020 20:46:33 pm
+Last Updated: December 30th 2020 15:39:39 pm
 '''
 
 import os
@@ -46,12 +46,32 @@ from hyssop.project.web import ControllerType
 
 class HelloControllerTypes(ControllerType):
     HelloController = ('hello_world', 'hello', 'hello')
+    HelloViewController = ('hello_view', 'hello', 'HelloView')
 ''')
 
         with open(join_path(self.project_controller_dir, 'hello.py'), 'w') as f:
             f.write('''\
 from aiohttp import web
 
+from hyssop_aiohttp import routes
+
+class HelloView(web.View):
+    async def get(self):
+        """
+        ---
+        tags:
+        - hello view
+        summary: hello world view get
+        description: simple test controller
+        produces:
+        - text/html
+        responses:
+            200:
+                description: return hello view message
+        """
+        return web.Response(text="Hello, world view")
+
+@routes.get('/hello')
 async def hello(request):
     """
     ---
@@ -80,6 +100,9 @@ component:
   hello: 
     p1: 'This is p1'
 controller:
-  /hello:
-    enum: hello_world
+  /hello_view:
+    enum: hello_view
+aiohttp:
+  route_decorators: 
+    - 'hello_world'
 ''')

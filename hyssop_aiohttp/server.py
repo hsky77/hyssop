@@ -7,7 +7,7 @@
 File created: November 21st 2020
 
 Modified By: hsky77
-Last Updated: December 27th 2020 07:51:33 am
+Last Updated: December 30th 2020 15:39:46 pm
 '''
 
 import os
@@ -17,7 +17,7 @@ from multidict import MultiDictProxy
 
 from aiohttp import web
 
-from hyssop.project.web import WebApplicationMinin
+from hyssop.project.web import WebApplicationMinin, ControllerType
 from hyssop.project.component import add_module_default_logger
 
 add_module_default_logger(['aiohttp.access', 'aiohttp.web'])
@@ -46,6 +46,21 @@ class AioHttpApplication(web.Application, WebApplicationMinin):
                     if not os.path.isdir(path):
                         os.mkdir(path)
                     self.add_routes([web.static(k, path, **v)])
+            if 'route_decorators' in self.project_config['aiohttp']:
+                try:
+                    controller_types = ControllerType.get_controller_enum_class()
+                    for key in self.project_config['aiohttp']['route_decorators']:
+                        for controller_type in controller_types:
+                            try:
+                                type_cls = controller_type(key)
+                                try:
+                                    cls_type = type_cls.import_class()
+                                except:
+                                    cls_type = type_cls.import_function()
+                            except:
+                                continue
+                except:
+                    pass
 
         self.add_routes(routes)
 
