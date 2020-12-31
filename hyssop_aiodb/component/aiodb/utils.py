@@ -7,7 +7,7 @@
 File created: September 4th 2020
 
 Modified By: howardlkung
-Last Updated: December 30th 2020 14:39:38 pm
+Last Updated: December 30th 2020 23:05:13 pm
 '''
 
 from uuid import UUID
@@ -142,15 +142,27 @@ class SQLAlchemyEntityMixin():
         return inspect(cls).columns
 
     @classmethod
+    def column_names(cls) -> List[str]:
+        return [c.name for c in cls.columns()]
+
+    @classmethod
     def primary_keys(cls) -> List[Column]:
         """Get list of primary key column classes"""
         return inspect(cls).primary_key
+
+    @classmethod
+    def primary_key_names(cls) -> List[str]:
+        return [c.name for c in cls.primary_keys()]
 
     @classmethod
     def non_primary_keys(cls) -> List[Column]:
         """Get list of non-primary key column classes"""
         pkeys = cls.primary_keys()
         return [x for x in cls.columns() if not x in pkeys]
+
+    @classmethod
+    def non_primary_key_names(cls) -> List[str]:
+        return [c.name for c in cls.non_primary_keys()]
 
     @classmethod
     def foreign_keys(cls) -> List[Column]:
@@ -195,7 +207,7 @@ class SQLAlchemyEntityMixin():
 
     def to_json_dict(self) -> Dict[str, Any]:
         """Generate dict that is serializable by Json convertor"""
-        return {k: v if not type(v) is datetime else str(v) for k, v in self.key_values}
+        return {k: v if not type(v) is datetime else str(v) for k, v in self.key_values.items()}
 
     def equals(self, right: "SQLAlchemyEntityMixin") -> bool:
         """Compare two entities"""
@@ -672,11 +684,13 @@ class AsyncEntityUW():
         if len(pks) > 0:
             entity = await self.load(cursor, **pks)
             if entity:
-                await self.update(cursor, entity, **entity.non_primary_key_values)
+                await self.update(cursor, entity, **self._entity_cls.filter_non_primary_key_values(**kwargs))
             else:
                 entity = await self.add(cursor, **kwargs)
             return entity
-        raise KeyError(BaseLocal.get_message(LocalCode_Primary_Key_required))
+        else:
+            entity = await self.add(cursor, **kwargs)
+            return entity
 
     async def update(self, cursor: AsyncCursorProxy, entity: SQLAlchemyEntityMixin, **kwargs) -> None:
         """Update entity non primary key values"""
