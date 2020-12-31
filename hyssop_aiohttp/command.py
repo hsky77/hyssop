@@ -7,7 +7,7 @@
 File created: November 21st 2020
 
 Modified By: hsky77
-Last Updated: December 30th 2020 15:39:39 pm
+Last Updated: December 30th 2020 17:06:01 pm
 '''
 
 import os
@@ -106,3 +106,11 @@ aiohttp:
   route_decorators: 
     - 'hello_world'
 ''')
+
+    def _create_project_requirement_files(self):
+        # requirement
+        import hyssop
+        from . import __name__, Version
+        with open(self.project_requirement_file, 'w') as f:
+            f.write('{}>={}\n'.format(hyssop.__name__, hyssop.Version))
+            f.write('{}>={}\n'.format(__name__, Version))
