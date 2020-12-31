@@ -6,8 +6,8 @@
 '''
 File created: November 21st 2020
 
-Modified By: hsky77
-Last Updated: December 30th 2020 15:39:46 pm
+Modified By: howardlkung
+Last Updated: December 30th 2020 23:19:06 pm
 '''
 
 import os
@@ -111,16 +111,23 @@ class AioHttpView(web.View):
 
     async def get_argument(self, name: str, default: Any = None) -> Any:
         if self.request.method in ['GET', 'DELETE']:
-            return self.request.query.get(name, default)
+            v = self.request.query.get(name, default)
         elif self.request.method in ['POST', 'PUT']:
             if not hasattr(self, '_parsed_body'):
                 if self.request.content_type == 'application/json':
                     self._parsed_body = await self.request.json()
                 else:
                     self._parsed_body = await self.request.post()
-            return self._parsed_body.get(name, default)
+            v = self._parsed_body.get(name, default)
         else:
             raise web.HTTPBadRequest()
+
+        if v:
+            return v
+        elif default:
+            return default
+        else:
+            raise KeyError(name)
 
     async def get_arguments_dict(self, args: List[str] = None) -> MultiDictProxy:
         if not hasattr(self, '_parsed_body'):
