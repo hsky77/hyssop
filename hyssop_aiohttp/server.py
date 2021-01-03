@@ -6,8 +6,8 @@
 '''
 File created: November 21st 2020
 
-Modified By: howardlkung
-Last Updated: December 30th 2020 23:19:06 pm
+Modified By: hsky77
+Last Updated: January 2nd 2021 08:09:52 am
 '''
 
 import os
@@ -23,6 +23,45 @@ from hyssop.project.component import add_module_default_logger
 add_module_default_logger(['aiohttp.access', 'aiohttp.web'])
 
 routes = web.RouteTableDef()
+
+
+class AioHttpRequest(web.Request):
+    @property
+    def app(self) -> "AioHttpApplication":
+        return super().app
+
+    async def get_argument(self, name: str, default: Any = None) -> Any:
+        if self.method in ['GET', 'DELETE']:
+            v = self.query.get(name, default)
+        elif self.method in ['POST', 'PUT']:
+            if not hasattr(self, '_parsed_body'):
+                if self.content_type == 'application/json':
+                    self._parsed_body = await self.json()
+                else:
+                    self._parsed_body = await self.post()
+            v = self._parsed_body.get(name, default)
+        else:
+            raise web.HTTPBadRequest()
+
+        if v:
+            return v
+        elif default:
+            return default
+        else:
+            raise KeyError(name)
+
+    async def get_arguments_dict(self, args: List[str] = None) -> MultiDictProxy:
+        if not hasattr(self, '_parsed_body'):
+            if self.content_type == 'application/json':
+                self._parsed_body = await self.json()
+            else:
+                self._parsed_body = await self.post()
+
+        data = {**self.query, **self._parsed_body}
+        if args:
+            return {k: v for k, v in data.items() if k in args}
+        else:
+            return data
 
 
 class AioHttpApplication(web.Application, WebApplicationMinin):
@@ -85,6 +124,18 @@ class AioHttpApplication(web.Application, WebApplicationMinin):
     async def dispose(self, app: web.Application):
         await self.component_manager.dispose_components()
 
+    def _make_request(
+        self,
+        message,
+        payload,
+        protocol,
+        writer,
+        task: "asyncio.Task[None]",
+        _cls: web.Request = web.Request,
+    ) -> web.Request:
+        return super()._make_request(
+            message, payload, protocol, writer, task, AioHttpRequest)
+
 
 class AioHttpServer():
     def __init__(self, project_dir: str):
@@ -98,46 +149,13 @@ class AioHttpServer():
                     ssl_context=self.app.project_ssl_context)
 
 
-class AioHttpRequest(web.Request):
-    @property
-    def app(self) -> AioHttpApplication:
-        return super().app
-
-
 class AioHttpView(web.View):
     @property
     def request(self) -> AioHttpRequest:
         return super().request
 
     async def get_argument(self, name: str, default: Any = None) -> Any:
-        if self.request.method in ['GET', 'DELETE']:
-            v = self.request.query.get(name, default)
-        elif self.request.method in ['POST', 'PUT']:
-            if not hasattr(self, '_parsed_body'):
-                if self.request.content_type == 'application/json':
-                    self._parsed_body = await self.request.json()
-                else:
-                    self._parsed_body = await self.request.post()
-            v = self._parsed_body.get(name, default)
-        else:
-            raise web.HTTPBadRequest()
-
-        if v:
-            return v
-        elif default:
-            return default
-        else:
-            raise KeyError(name)
+        return await self.request.get_argument(name, default)
 
     async def get_arguments_dict(self, args: List[str] = None) -> MultiDictProxy:
-        if not hasattr(self, '_parsed_body'):
-            if self.request.content_type == 'application/json':
-                self._parsed_body = await self.request.json()
-            else:
-                self._parsed_body = await self.request.post()
-
-        data = {**self.request.query, **self._parsed_body}
-        if args:
-            return {k: v for k, v in data.items() if k in args}
-        else:
-            return data
+        return await self.request.get_arguments_dict(args)
