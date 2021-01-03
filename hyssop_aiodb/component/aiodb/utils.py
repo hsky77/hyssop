@@ -6,8 +6,8 @@
 '''
 File created: September 4th 2020
 
-Modified By: howardlkung
-Last Updated: December 30th 2020 23:05:13 pm
+Modified By: hsky77
+Last Updated: January 3rd 2021 08:46:05 am
 '''
 
 from uuid import UUID
@@ -25,6 +25,7 @@ from sqlalchemy.sql.elements import BinaryExpression, ClauseElement
 from sqlalchemy.engine.result import ResultMetaData, RowProxy
 from sqlalchemy.engine.interfaces import ExecutionContext
 from sqlalchemy.sql.ddl import DDLElement
+from sqlalchemy.sql import Insert, Update, Delete
 from sqlalchemy.inspection import inspect
 
 import aiosqlite
@@ -231,10 +232,18 @@ class ClauseCompiler():
         self._dialect = dialect
 
     def compile(self, query) -> Tuple[str, list, CompilationContext]:
-        compiled = query.compile(dialect=self._dialect)
-
         execution_context = self._dialect.execution_ctx_cls()
         execution_context.dialect = self._dialect
+
+        # execute value functions
+        if isinstance(query, Insert):
+            execution_context.current_parameters = query.parameters
+            self.set_default_value(query, execution_context)
+        elif isinstance(query, Update):
+            execution_context.current_parameters = query.parameters
+            self.set_update_value(query, execution_context)
+
+        compiled = query.compile(dialect=self._dialect)
 
         args = []
 
@@ -253,13 +262,27 @@ class ClauseCompiler():
             )
         return compiled.string, args, CompilationContext(execution_context)
 
+    def set_default_value(self, clause: ClauseElement, context: ExecutionContext):
+        for column in clause.table.columns:
+            if not column.name in clause.parameters and column.default:
+                clause.parameters[column.name] = column.default.arg(context) if callable(
+                    column.default.arg) else column.default.arg
+
+                if isinstance(clause.parameters[column.name], UUID):
+                    clause.parameters[column.name] = clause.parameters[column.name].hex
+
+    def set_update_value(self, clause: ClauseElement, context: ExecutionContext):
+        for column in clause.table.columns:
+            if column.onupdate and callable(column.onupdate.arg):
+                clause.parameters[column.name] = column.onupdate.arg(context)
+
 
 class AsyncCursorProxy():
     def __init__(self, connection_proxy: "AsyncConnectionProxy", compiler: ClauseCompiler):
         self._connection_proxy = connection_proxy
         self._compiler = compiler
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> "AsyncCursorProxy":
         raise NotImplementedError()
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
@@ -275,6 +298,9 @@ class AsyncCursorProxy():
         raise NotImplementedError()
 
     async def execute(self, clause: ClauseElement) -> Any:
+        raise NotImplementedError()
+
+    async def execute_return_row(self, clause: ClauseElement) -> Optional[RowProxy]:
         raise NotImplementedError()
 
     async def execute_many(self, queries: List[ClauseElement]) -> None:
@@ -332,9 +358,21 @@ class AioSqliteCursorProxy(AsyncCursorProxy):
     async def execute(self, clause: ClauseElement) -> Any:
         query, args, _ = self._compiler.compile(clause)
         await self.cursor.execute(query, args)
-        if self.cursor.lastrowid == 0:
-            return self.cursor.rowcount
-        return self.cursor.lastrowid
+        return self.cursor.rowcount if self.cursor.lastrowid == 0 else self.cursor.lastrowid
+
+    async def execute_return_row(self, clause: ClauseElement) -> Optional[RowProxy]:
+        query, args, _ = self._compiler.compile(clause)
+        await self.cursor.execute(query, args)
+        rowid = self.cursor.rowcount if self.cursor.lastrowid == 0 else self.cursor.lastrowid
+
+        # fetch inserted/updated row
+        await self.cursor.execute('SELECT * from {} where rowid = {}'.format(clause.table.name, rowid))
+        row = await self.cursor.fetchone()
+        _, _, context = self._compiler.compile(clause.table.select())
+        if row is None:
+            return None
+        metadata = ResultMetaData(context, self.cursor.description)
+        return RowProxy(metadata, row, metadata._processors, metadata._keymap)
 
     async def execute_many(self, queries: List[ClauseElement]) -> None:
         for query in queries:
@@ -401,6 +439,20 @@ class AioMysqlCursorProxy(AsyncCursorProxy):
         if self.cursor.lastrowid == 0:
             return self.cursor.rowcount
         return self.cursor.lastrowid
+
+    async def execute_return_row(self, clause: ClauseElement) -> Optional[RowProxy]:
+        query, args, _ = self._compiler.compile(clause)
+        await self.cursor.execute(query, args)
+        rowid = self.cursor.rowcount if self.cursor.lastrowid == 0 else self.cursor.lastrowid
+
+        # fetch inserted/updated row
+        await self.cursor.execute('SELECT * from {} where rowid = {}'.format(clause.table.name, rowid))
+        row = await self.cursor.fetchone()
+        _, _, context = self._compiler.compile(clause.table.select())
+        if row is None:
+            return None
+        metadata = ResultMetaData(context, self.cursor.description)
+        return RowProxy(metadata, row, metadata._processors, metadata._keymap)
 
     async def execute_many(self, queries: List[ClauseElement]) -> None:
         for query in queries:
@@ -609,9 +661,11 @@ class AsyncEntityUW():
         return kwargs
 
     def value_type_convert(self, t: type, v: Any):
-        if t is datetime:
+        if isinstance(v, t):
+            return v
+        elif t is datetime:
             return str_to_datetime(v)
-        if t is date:
+        elif t is date:
             return str_to_datetime(v).date()
         elif issubclass(t, enum.IntEnum):
             return t(int(v))
@@ -666,17 +720,8 @@ class AsyncEntityUW():
         """Insert one entity"""
         kwargs = self.convert_value_type(**kwargs)
 
-        # set default values
-        for column in self._entity_cls.columns():
-            if not column.name in kwargs and column.default:
-                kwargs[column.name] = column.default.arg() if callable(
-                    column.default.arg) else column.default.arg
-
-                if isinstance(kwargs[column.name], UUID):
-                    kwargs[column.name] = kwargs[column.name].hex
-
-        id = await cursor.execute(self._entity_cls.table().insert().values(**kwargs))
-        return await self.load(cursor, **self._entity_cls.filter_primary_key_values(**kwargs)) if id else None
+        row = await cursor.execute_return_row(self._entity_cls.table().insert().values(**kwargs))
+        return self._entity_cls(**dict(row.items())) if row else None
 
     async def merge(self, cursor: AsyncCursorProxy, **kwargs) -> SQLAlchemyEntityMixin:
         """Insert or replace one entity."""
@@ -684,7 +729,7 @@ class AsyncEntityUW():
         if len(pks) > 0:
             entity = await self.load(cursor, **pks)
             if entity:
-                await self.update(cursor, entity, **self._entity_cls.filter_non_primary_key_values(**kwargs))
+                entity = await self.update(cursor, entity, **self._entity_cls.filter_non_primary_key_values(**kwargs))
             else:
                 entity = await self.add(cursor, **kwargs)
             return entity
@@ -692,7 +737,7 @@ class AsyncEntityUW():
             entity = await self.add(cursor, **kwargs)
             return entity
 
-    async def update(self, cursor: AsyncCursorProxy, entity: SQLAlchemyEntityMixin, **kwargs) -> None:
+    async def update(self, cursor: AsyncCursorProxy, entity: SQLAlchemyEntityMixin, **kwargs) -> SQLAlchemyEntityMixin:
         """Update entity non primary key values"""
         if entity and len(kwargs) > 0:
             self._check_allow_to_update(kwargs)
@@ -710,7 +755,9 @@ class AsyncEntityUW():
                         setattr(entity, k, v)
                 else:
                     raise RuntimeError(LocalCode_Invalid_Column, k)
-            await cursor.execute(entity.table().update().where(self.primary_key_clause(cursor, **entity.key_values)).values(**entity.key_values))
+
+            row = await cursor.execute_return_row(entity.table().update().where(self.primary_key_clause(cursor, **entity.key_values)).values(**entity.key_values))
+            return self._entity_cls(**dict(row.items())) if row else None
 
     def _check_allow_to_update(self, kwargs):
         for k in kwargs:
