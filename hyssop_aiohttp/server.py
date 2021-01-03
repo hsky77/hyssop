@@ -7,7 +7,7 @@
 File created: November 21st 2020
 
 Modified By: hsky77
-Last Updated: January 2nd 2021 08:09:52 am
+Last Updated: January 3rd 2021 09:14:38 am
 '''
 
 import os
@@ -48,7 +48,8 @@ class AioHttpRequest(web.Request):
         elif default:
             return default
         else:
-            raise KeyError(name)
+            e = KeyError(name)
+            raise web.HTTPBadRequest(text=str(e))
 
     async def get_arguments_dict(self, args: List[str] = None) -> MultiDictProxy:
         if not hasattr(self, '_parsed_body'):
@@ -93,9 +94,9 @@ class AioHttpApplication(web.Application, WebApplicationMinin):
                             try:
                                 type_cls = controller_type(key)
                                 try:
-                                    cls_type = type_cls.import_class()
+                                    _ = type_cls.import_class()
                                 except:
-                                    cls_type = type_cls.import_function()
+                                    _ = type_cls.import_function()
                             except:
                                 continue
                 except:

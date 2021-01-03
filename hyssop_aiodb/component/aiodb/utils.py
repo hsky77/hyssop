@@ -7,7 +7,7 @@
 File created: September 4th 2020
 
 Modified By: hsky77
-Last Updated: January 3rd 2021 08:46:05 am
+Last Updated: January 3rd 2021 09:26:34 am
 '''
 
 from uuid import UUID
@@ -756,8 +756,8 @@ class AsyncEntityUW():
                 else:
                     raise RuntimeError(LocalCode_Invalid_Column, k)
 
-            row = await cursor.execute_return_row(entity.table().update().where(self.primary_key_clause(cursor, **entity.key_values)).values(**entity.key_values))
-            return self._entity_cls(**dict(row.items())) if row else None
+            await cursor.execute(entity.table().update().where(self.primary_key_clause(cursor, **entity.key_values)).values(**entity.key_values))
+            return await self.load(cursor, **entity.primary_key_values)
 
     def _check_allow_to_update(self, kwargs):
         for k in kwargs:
