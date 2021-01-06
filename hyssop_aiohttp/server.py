@@ -7,7 +7,7 @@
 File created: November 21st 2020
 
 Modified By: hsky77
-Last Updated: January 3rd 2021 09:14:38 am
+Last Updated: January 5th 2021 19:02:05 pm
 '''
 
 import os
@@ -18,7 +18,11 @@ from multidict import MultiDictProxy
 from aiohttp import web
 
 from hyssop.project.web import WebApplicationMinin, ControllerType
-from hyssop.project.component import add_module_default_logger
+from hyssop.project.component import add_module_default_logger, add_default_component_types
+
+from hyssop_aiohttp.component import AioHttpComponentTypes
+
+add_default_component_types(AioHttpComponentTypes)
 
 add_module_default_logger(['aiohttp.access', 'aiohttp.web'])
 

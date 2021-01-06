@@ -44,7 +44,7 @@ This module contains the "yaml" configurable component classes for hyssop applic
                     p1: xxxx        # parameter p1 of Foo.init()
 
 Modified By: hsky77
-Last Updated: November 22nd 2020 12:23:06 pm
+Last Updated: January 5th 2021 19:01:42 pm
 '''
 
 from typing import Dict, List, Union
@@ -63,6 +63,13 @@ class DefaultComponentTypes(ComponentTypes):
     Logger = ['logger', 'default', 'LoggerComponent']
     Callback = ('callback', 'default', 'CallbackComponent')
     Executor = ('executor', 'default', 'ExecutorComponent')
+
+
+DefaultComponentEnums = [DefaultComponentTypes]
+
+
+def add_default_component_types(component_type: ComponentTypes):
+    DefaultComponentEnums.insert(0, component_type)
 
 
 def __create_optional_components(component_manager: ComponentManager, component_settings: Dict, component_types: ComponentTypes, project_dir: str) -> None:
@@ -98,22 +105,25 @@ def create_component_manager(project_dir: str, component_settings: Union[Dict, N
     component_manager = ComponentManager()
 
     # default components
-    for default_type in DefaultComponentTypes:
-        comp = default_type.import_class()(default_type)
-        component_manager.set_component(comp)
+    for default_enums in DefaultComponentEnums:
+        for default_type in default_enums:
+            comp = default_type.import_class()(default_type)
+            component_manager.set_component(comp)
 
     # init
-    for default_type in DefaultComponentTypes:
-        if component_settings and default_type.enum_key in component_settings:
-            component_manager.invoke(default_type, 'init',
-                                     component_manager,
-                                     **(component_settings[default_type.enum_key] or {}),
-                                     project_dir=project_dir)
-        else:
-            component_manager.invoke(
-                default_type, 'init', component_manager, project_dir=project_dir)
+    for default_enums in DefaultComponentEnums:
+        for default_type in default_enums:
+            if component_settings and default_type.enum_key in component_settings:
+                component_manager.invoke(default_type, 'init',
+                                         component_manager,
+                                         **(component_settings[default_type.enum_key] or {}),
+                                         project_dir=project_dir)
+            else:
+                component_manager.invoke(
+                    default_type, 'init', component_manager, project_dir=project_dir)
 
-    sort_types = [DefaultComponentTypes]
+    sort_types = DefaultComponentEnums
+
     # extensions
     ext_comp_types = ComponentTypes.get_component_enum_class()
 
@@ -121,8 +131,7 @@ def create_component_manager(project_dir: str, component_settings: Union[Dict, N
     ConfigComponentValidator(component_settings)
 
     if ext_comp_types is not None:
-        sort_types = ext_comp_types + \
-            [DefaultComponentTypes]
+        sort_types = ext_comp_types + sort_types
 
         # check duplicated key:
         for r_type in sort_types:
