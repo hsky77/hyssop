@@ -7,7 +7,11 @@
 File created: December 26th 2020
 
 Modified By: hsky77
-Last Updated: December 26th 2020 21:12:22 pm
+Last Updated: January 8th 2021 13:24:27 pm
 '''
 
-from .aiodb import *
+from hyssop.project.component import ComponentTypes
+
+
+class AioDBComponentTypes(ComponentTypes):
+    AioDB = ('aiodb', 'aiodb', 'AioDBComponent')

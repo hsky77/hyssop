@@ -7,7 +7,7 @@
 File created: December 26th 2020
 
 Modified By: hsky77
-Last Updated: December 26th 2020 21:43:57 pm
+Last Updated: January 8th 2021 13:24:46 pm
 '''
 
 import enum
@@ -20,7 +20,7 @@ from sqlalchemy.orm import relationship
 
 from hyssop.unit_test import UnitTestCase
 
-from component import get_declarative_base, SQLAlchemyEntityMixin, AsyncEntityUW, AioSqliteDatabase
+from component.aiodb import get_declarative_base, SQLAlchemyEntityMixin, AsyncEntityUW, AioSqliteDatabase
 
 from . import __path__
 
