@@ -7,7 +7,7 @@
 File created: November 21st 2020
 
 Modified By: hsky77
-Last Updated: January 5th 2021 19:02:05 pm
+Last Updated: January 7th 2021 19:10:42 pm
 '''
 
 import os
@@ -125,6 +125,8 @@ class AioHttpApplication(web.Application, WebApplicationMinin):
         from hyssop.project.component import DefaultComponentTypes
         self.component_manager.invoke(
             DefaultComponentTypes.Logger, 'update_default_logger', self.project_config['debug'])
+
+        await self.component_manager.boardcast_async('on_before_server_start')
 
     async def dispose(self, app: web.Application):
         await self.component_manager.dispose_components()

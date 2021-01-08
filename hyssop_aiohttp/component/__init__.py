@@ -7,10 +7,12 @@
 File created: January 1st 2021
 
 Modified By: hsky77
-Last Updated: January 5th 2021 19:03:26 pm
+Last Updated: January 7th 2021 15:30:08 pm
 '''
 
 from hyssop.project.component import ComponentTypes
+
+from .aio_client import AioClientComponent
 
 
 class AioHttpComponentTypes(ComponentTypes):

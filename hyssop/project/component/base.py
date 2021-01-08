@@ -9,7 +9,7 @@ File created: August 21st 2020
 This module defines the base component classes
 
 Modified By: hsky77
-Last Updated: November 22nd 2020 00:42:05 am
+Last Updated: January 7th 2021 19:17:20 pm
 '''
 
 
@@ -80,12 +80,12 @@ class ComponentManager():
         """
         result = []
         for component in self.components:
-            func = getattr(component, method)
-            if callable(func):
-                if not iscoroutinefunction(func):
-                    result.append(
-                        (component.component_type, func(*arugs, **kwargs)))
-
+            if hasattr(component, method):
+                func = getattr(component, method)
+                if callable(func):
+                    if not iscoroutinefunction(func):
+                        result.append(
+                            (component.component_type, func(*arugs, **kwargs)))
         return result
 
     async def boardcast_async(self, method: str, *arugs, **kwargs) -> List[Tuple[ComponentTypes, Any]]:
@@ -96,13 +96,14 @@ class ComponentManager():
         """
         result = []
         for component in self.components:
-            func = getattr(component, method)
-            if callable(func):
-                if iscoroutinefunction(func):
-                    result.append((component.component_type, await func(*arugs, **kwargs)))
-                else:
-                    result.append(
-                        (component.component_type, func(*arugs, **kwargs)))
+            if hasattr(component, method):
+                func = getattr(component, method)
+                if callable(func):
+                    if iscoroutinefunction(func):
+                        result.append((component.component_type, await func(*arugs, **kwargs)))
+                    else:
+                        result.append(
+                            (component.component_type, func(*arugs, **kwargs)))
         return result
 
     def invoke(self, enum_type: ComponentTypes, method: str, *arugs, **kwargs) -> Any:
