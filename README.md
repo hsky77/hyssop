@@ -8,13 +8,25 @@
 
 **Install** hyssop with pip: ``pip install hyssop``
 
-## Change log
+# Change log 
 
-* **1.0.3 - Nov. 22, 2020**:
-  * Refactor the project and remove the web framework dependencies.
+## hyssop
+
+* **1.1.0 - Jan. 10, 2021**:
+  * Refactor the project and remove the web framework tornado dependencies. 
 
 * **1.0.2 - Oct. 14, 2020**:
    * Fix bugs.
 
 * **1.0.0 - Aug. 20, 2020**:
    * Initalize project.
+
+## hyssop-aiohttp
+
+* **0.0.1 - Jan. 10, 2021**:
+  * Integrate with [aiohttp](https://docs.aiohttp.org/en/stable/) web framework.
+
+## hyssop-aiodb
+
+* **0.0.1 - Jan. 10, 2021**:
+  * Re-implement database module with [aiomysql](https://aiomysql.readthedocs.io/en/latest/index.html) & [aiosqlite](https://aiosqlite.omnilib.dev/en/stable/index.html).
