@@ -44,7 +44,7 @@ This module contains the "yaml" configurable component classes for hyssop applic
                     p1: xxxx        # parameter p1 of Foo.init()
 
 Modified By: hsky77
-Last Updated: January 5th 2021 19:01:42 pm
+Last Updated: January 17th 2021 17:56:39 pm
 '''
 
 from typing import Dict, List, Union
@@ -104,6 +104,9 @@ def __create_optional_components(component_manager: ComponentManager, component_
 def create_component_manager(project_dir: str, component_settings: Union[Dict, None] = None) -> ComponentManager:
     component_manager = ComponentManager()
 
+    # extensions
+    ext_comp_types = ComponentTypes.get_component_enum_class()
+
     # default components
     for default_enums in DefaultComponentEnums:
         for default_type in default_enums:
@@ -123,9 +126,6 @@ def create_component_manager(project_dir: str, component_settings: Union[Dict, N
                     default_type, 'init', component_manager, project_dir=project_dir)
 
     sort_types = DefaultComponentEnums
-
-    # extensions
-    ext_comp_types = ComponentTypes.get_component_enum_class()
 
     # validate config
     ConfigComponentValidator(component_settings)
