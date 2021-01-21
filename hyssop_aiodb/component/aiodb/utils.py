@@ -6,8 +6,8 @@
 '''
 File created: September 4th 2020
 
-Modified By: hsky77
-Last Updated: January 3rd 2021 09:26:34 am
+Modified By: howardlkung
+Last Updated: January 20th 2021 21:24:46 pm
 '''
 
 from uuid import UUID
@@ -253,6 +253,13 @@ class ClauseCompiler():
                     val = compiled._bind_processors[key](raw_val)
                 else:
                     val = raw_val
+                if hasattr(query, 'table') and key in query.table.primary_key.columns:
+                    if not hasattr(query, 'select_pk_clauses'):
+                        query.select_pk_clauses = query.table.primary_key.columns[key] == val
+                    else:
+                        query.select_pk_clauses = and_(
+                            query.select_pk_clauses, query.table.primary_key.columns[key] == val)
+
                 args.append(val)
 
             execution_context.result_column_struct = (
@@ -264,7 +271,8 @@ class ClauseCompiler():
 
     def set_default_value(self, clause: ClauseElement, context: ExecutionContext):
         for column in clause.table.columns:
-            if not column.name in clause.parameters and column.default:
+            if (column.name in clause.parameters and clause.parameters[column.name] is None and column.default) or (
+                    not column.name in clause.parameters and column.default):
                 clause.parameters[column.name] = column.default.arg(context) if callable(
                     column.default.arg) else column.default.arg
 
@@ -363,16 +371,15 @@ class AioSqliteCursorProxy(AsyncCursorProxy):
     async def execute_return_row(self, clause: ClauseElement) -> Optional[RowProxy]:
         query, args, _ = self._compiler.compile(clause)
         await self.cursor.execute(query, args)
-        rowid = self.cursor.rowcount if self.cursor.lastrowid == 0 else self.cursor.lastrowid
-
-        # fetch inserted/updated row
-        await self.cursor.execute('SELECT * from {} where rowid = {}'.format(clause.table.name, rowid))
-        row = await self.cursor.fetchone()
-        _, _, context = self._compiler.compile(clause.table.select())
-        if row is None:
-            return None
-        metadata = ResultMetaData(context, self.cursor.description)
-        return RowProxy(metadata, row, metadata._processors, metadata._keymap)
+        if clause.table._autoincrement_column is not None:
+            rowid = self.cursor.rowcount if self.cursor.lastrowid == 0 else self.cursor.lastrowid
+            select_clause = clause.table.select().where(
+                clause.table._autoincrement_column == rowid)
+            row = await self.fetch_one(select_clause)
+        else:
+            select_clause = clause.table.select().where(clause.select_pk_clauses)
+            row = await self.fetch_one(select_clause)
+        return row
 
     async def execute_many(self, queries: List[ClauseElement]) -> None:
         for query in queries:
@@ -443,16 +450,15 @@ class AioMysqlCursorProxy(AsyncCursorProxy):
     async def execute_return_row(self, clause: ClauseElement) -> Optional[RowProxy]:
         query, args, _ = self._compiler.compile(clause)
         await self.cursor.execute(query, args)
-        rowid = self.cursor.rowcount if self.cursor.lastrowid == 0 else self.cursor.lastrowid
-
-        # fetch inserted/updated row
-        await self.cursor.execute('SELECT * from {} where rowid = {}'.format(clause.table.name, rowid))
-        row = await self.cursor.fetchone()
-        _, _, context = self._compiler.compile(clause.table.select())
-        if row is None:
-            return None
-        metadata = ResultMetaData(context, self.cursor.description)
-        return RowProxy(metadata, row, metadata._processors, metadata._keymap)
+        if clause.table._autoincrement_column is not None:
+            rowid = self.cursor.rowcount if self.cursor.lastrowid == 0 else self.cursor.lastrowid
+            select_clause = clause.table.select().where(
+                clause.table._autoincrement_column == rowid)
+            row = await self.fetch_one(select_clause)
+        else:
+            select_clause = clause.table.select().where(clause.select_pk_clauses)
+            row = await self.fetch_one(select_clause)
+        return row
 
     async def execute_many(self, queries: List[ClauseElement]) -> None:
         for query in queries:
@@ -669,6 +675,8 @@ class AsyncEntityUW():
             return str_to_datetime(v).date()
         elif issubclass(t, enum.IntEnum):
             return t(int(v))
+        elif v is None:
+            return None
         else:
             return t(v)
 
