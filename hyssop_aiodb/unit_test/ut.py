@@ -7,11 +7,12 @@
 File created: December 26th 2020
 
 Modified By: hsky77
-Last Updated: January 8th 2021 13:24:46 pm
+Last Updated: January 24th 2021 15:46:00 pm
 '''
 
 import enum
 import asyncio
+from random import randint
 from datetime import datetime
 from typing import Dict, Any
 
@@ -20,7 +21,7 @@ from sqlalchemy.orm import relationship
 
 from hyssop.unit_test import UnitTestCase
 
-from component.aiodb import get_declarative_base, SQLAlchemyEntityMixin, AsyncEntityUW, AioSqliteDatabase
+from component.aiodb import get_declarative_base, SQLAlchemyEntityMixin, AsyncEntityUW, AioSqliteDatabase, AioMySQLDatabase
 
 from . import __path__
 
@@ -83,48 +84,57 @@ AccountInfoUW = AsyncEntityUW(AccountInfoEntity)
 
 class AioDBTestCase(UnitTestCase):
     def test(self):
-        db = AioSqliteDatabase(
-            SW_MODULES, file_name=__path__[0] + "/testdb.db")
+        db = AioMySQLDatabase(SW_MODULES, host='127.0.0.1', port=3306,
+                              user='root', password='Hk..8564', db_name='test')
+        # db = AioSqliteDatabase(
+        #     SW_MODULES, file_name=__path__[0] + "/testdb.db")
 
         async def testAsync(index: str):
             async with db.get_connection_proxy() as conn:
                 async with conn.get_cursor_proxy() as cur:
-                    accounts = await AccountUW.select(cur)
+                    # accounts = await AccountUW.select(cur)
 
                     account_data = {
                         'account': index,
-                        'password': '1234',
+                        # 'password': '1234',
                     }
 
-                    account = await AccountUW.add(cur, **account_data)
-
-                    accounts = await AccountUW.select(cur, **account_data)
-                    self.assertEqual(len(accounts), 1)
-
                     account = await AccountUW.load(cur, **account_data)
-                    self.assertIsNotNone(account)
 
-                    account = await AccountUW.load(cur, id=account.id)
-                    self.assertIsNotNone(account)
+                    if not account:
+                        account = await AccountUW.add(cur, **account_data)
 
-                    account = await AccountUW.merge(cur, **account.key_values)
+                    # accounts = await AccountUW.select(cur, **account_data)
+                    # self.assertEqual(len(accounts), 1)
 
-                    await AccountUW.update(cur, account, password='5678')
-                    self.assertEqual(account.password, '5678')
+                    # account = await AccountUW.load(cur, **account_data)
+                    # self.assertIsNotNone(account)
+
+                    # account = await AccountUW.load(cur, id=account.id)
+                    # self.assertIsNotNone(account)
+
+                    # account = await AccountUW.merge(cur, **account.key_values)
+
+                    password = str(randint(0, 1000))
+                    account = await AccountUW.update(cur, account, password=password)
+                    self.assertEqual(account.password, password)
+
+                    # account = await AccountUW.update(cur, account, account_type=AccountType.SW_Account)
+                    # self.assertEqual(account.account_type, AccountType.SW_Account)
 
                     # account_info = await AccountInfoUW.add(cur, email="xxx@ooo.com", account_id=account.id)
 
-                    await AccountUW.delete(cur, [account])
+                    # await AccountUW.delete(cur, [account])
 
-                    account = await AccountUW.load(cur, **account_data)
-                    self.assertIsNone(account)
+                    # account = await AccountUW.load(cur, **account_data)
+                    # self.assertIsNone(account)
 
-                    # await cur.commit()
+                    await cur.commit()
 
         futures = []
-        count = 500
+        count = 1000
         for i in range(count):
-            futures.append(asyncio.ensure_future(testAsync(str(i))))
+            futures.append(asyncio.ensure_future(testAsync(str(0))))
 
         loop = asyncio.get_event_loop()
 

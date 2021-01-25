@@ -19,7 +19,7 @@ File created: September 4th 2020
             orm:                                    # indicate OrmDB Component
                 db_id_1:    <str>                   # define string id will be use in code
                     module: <str>                   # required - support 'sqlite', 'sqlite_memory', 'mysql'
-                    connections: <int>                   # optional - db access worker limit, default 1
+                    connections: <int>                   # optional - db access worker limit, default 5
 
                     # when module is 'sqlite', you should add parameters:
                     file_name: <str>                # required - specify sqlite db file path
@@ -33,8 +33,8 @@ File created: September 4th 2020
                 db_id_2:
                     ...etc
 
-Modified By: howardlkung
-Last Updated: December 27th 2020 17:53:54 pm
+Modified By: hsky77
+Last Updated: January 24th 2021 15:55:49 pm
 '''
 
 import logging
@@ -68,7 +68,6 @@ class AioDBComponent(Component):
         self.dbs = {k: v for k, v in kwargs.items() if not 'project_dir' in k}
         for k in self.dbs:
             self.dbs[k]['db'] = None
-            self.dbs[k]['connections'] = self.dbs[k].get('connections', 1)
 
             if not self.dbs[k]['module'] in self.support_db_type:
                 raise ValueError(BaseLocal.get_message(
