@@ -7,7 +7,7 @@
 File created: September 4th 2020
 
 Modified By: hsky77
-Last Updated: December 26th 2020 21:29:30 pm
+Last Updated: February 2nd 2021 14:40:34 pm
 '''
 
-Version = '0.0.1'
+Version = '0.0.2'

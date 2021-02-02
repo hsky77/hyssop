@@ -28,5 +28,9 @@
 
 ## hyssop-aiodb
 
+* **0.0.2 - Feb. 02, 2021**:
+  * Add mysql connection proxy pool
+  * Fix aiodb mysql cursor retrived inserted row bug
+
 * **0.0.1 - Jan. 10, 2021**:
   * Re-implement database module with [aiomysql](https://aiomysql.readthedocs.io/en/latest/index.html) & [aiosqlite](https://aiosqlite.omnilib.dev/en/stable/index.html).
