@@ -7,7 +7,7 @@
 File created: September 4th 2020
 
 Modified By: hsky77
-Last Updated: January 24th 2021 15:55:44 pm
+Last Updated: February 2nd 2021 21:27:06 pm
 '''
 
 from uuid import UUID
@@ -804,6 +804,8 @@ class AsyncEntityUW():
 
             await cursor.execute(entity.table().update().where(self.primary_key_clause(cursor, **entity.key_values)).values(**entity.key_values))
             return await self.load(cursor, **entity.primary_key_values)
+        else:
+            return entity            
 
     def _check_allow_to_update(self, kwargs):
         for k in kwargs:
