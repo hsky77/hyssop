@@ -7,7 +7,7 @@
 File created: December 26th 2020
 
 Modified By: hsky77
-Last Updated: January 24th 2021 15:46:00 pm
+Last Updated: February 2nd 2021 22:12:59 pm
 '''
 
 import enum
@@ -84,19 +84,15 @@ AccountInfoUW = AsyncEntityUW(AccountInfoEntity)
 
 class AioDBTestCase(UnitTestCase):
     def test(self):
-        db = AioMySQLDatabase(SW_MODULES, host='127.0.0.1', port=3306,
-                              user='root', password='Hk..8564', db_name='test')
-        # db = AioSqliteDatabase(
-        #     SW_MODULES, file_name=__path__[0] + "/testdb.db")
+        db = AioSqliteDatabase(
+            SW_MODULES, file_name=__path__[0] + "/testdb.db")
 
         async def testAsync(index: str):
             async with db.get_connection_proxy() as conn:
                 async with conn.get_cursor_proxy() as cur:
-                    # accounts = await AccountUW.select(cur)
-
                     account_data = {
                         'account': index,
-                        # 'password': '1234',
+                        'password': '1234',
                     }
 
                     account = await AccountUW.load(cur, **account_data)
@@ -104,37 +100,36 @@ class AioDBTestCase(UnitTestCase):
                     if not account:
                         account = await AccountUW.add(cur, **account_data)
 
-                    # accounts = await AccountUW.select(cur, **account_data)
-                    # self.assertEqual(len(accounts), 1)
+                    accounts = await AccountUW.select(cur, **account_data)
+                    self.assertEqual(len(accounts), 1)
 
-                    # account = await AccountUW.load(cur, **account_data)
-                    # self.assertIsNotNone(account)
+                    account = await AccountUW.load(cur, **account_data)
+                    self.assertIsNotNone(account)
 
-                    # account = await AccountUW.load(cur, id=account.id)
-                    # self.assertIsNotNone(account)
-
-                    # account = await AccountUW.merge(cur, **account.key_values)
+                    account = await AccountUW.merge(cur, **account.key_values)
 
                     password = str(randint(0, 1000))
                     account = await AccountUW.update(cur, account, password=password)
                     self.assertEqual(account.password, password)
 
-                    # account = await AccountUW.update(cur, account, account_type=AccountType.SW_Account)
-                    # self.assertEqual(account.account_type, AccountType.SW_Account)
+                    account = await AccountUW.update(cur, account, **account_data)
+                    self.assertEqual(account.password,
+                                     account_data['password'])
 
+                    account = await AccountUW.update(cur, account, valid_from=str(datetime.now()))
                     # account_info = await AccountInfoUW.add(cur, email="xxx@ooo.com", account_id=account.id)
 
-                    # await AccountUW.delete(cur, [account])
+                    await AccountUW.delete(cur, [account])
 
-                    # account = await AccountUW.load(cur, **account_data)
-                    # self.assertIsNone(account)
+                    account = await AccountUW.load(cur, **account_data)
+                    self.assertIsNone(account)
 
                     await cur.commit()
 
         futures = []
-        count = 1000
+        count = 100
         for i in range(count):
-            futures.append(asyncio.ensure_future(testAsync(str(0))))
+            futures.append(asyncio.ensure_future(testAsync(str(i))))
 
         loop = asyncio.get_event_loop()
 

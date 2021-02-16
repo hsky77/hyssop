@@ -7,7 +7,7 @@
 File created: September 4th 2020
 
 Modified By: hsky77
-Last Updated: February 2nd 2021 21:27:06 pm
+Last Updated: February 3rd 2021 20:49:16 pm
 '''
 
 from uuid import UUID
@@ -35,7 +35,8 @@ from hyssop.util import BaseLocal
 
 from .constants import (LocalCode_Missing_File_Path, LocalCode_Missing_Host, LocalCode_Missing_User,
                         LocalCode_No_Valid_DT_FORMAT,  LocalCode_Missing_Password, LocalCode_Missing_DB_Name,
-                        LocalCode_Invalid_Column, LocalCode_Primary_Key_required, LocalCode_Not_Allow_Update)
+                        LocalCode_Invalid_Column, LocalCode_Primary_Key_required, LocalCode_Not_Allow_Update,
+                        LocalCode_Invalid_Boolean)
 
 DeclarativeBases: dict = {}
 
@@ -711,6 +712,14 @@ class AsyncEntityUW():
             return str_to_datetime(v)
         elif t is date:
             return str_to_datetime(v).date()
+        elif t is bool:
+            if v == 'True' or v == 'true':
+                return True
+            elif v == 'False' or v == 'false':
+                return False
+            else:
+                raise ValueError(BaseLocal.get_message(
+                    LocalCode_Invalid_Boolean, v))
         elif issubclass(t, enum.IntEnum):
             return t(int(v))
         elif v is None:
@@ -784,28 +793,15 @@ class AsyncEntityUW():
             return entity
 
     async def update(self, cursor: AsyncCursorProxy, entity: SQLAlchemyEntityMixin, **kwargs) -> SQLAlchemyEntityMixin:
-        """Update entity non primary key values"""
-        if entity and len(kwargs) > 0:
-            self._check_allow_to_update(kwargs)
-            kwargs = self.convert_value_type(**kwargs)
+        """Update entity values"""
+        self._check_allow_to_update(kwargs)
 
-            npks = entity.non_primary_key_values
-            for k, v in kwargs.items():
-                if k in npks:
-                    if isinstance(getattr(entity, k), datetime):
-                        if isinstance(v, str):
-                            setattr(entity, k, str_to_datetime(v))
-                        else:
-                            setattr(entity, k, v)
-                    else:
-                        setattr(entity, k, v)
-                else:
-                    raise RuntimeError(LocalCode_Invalid_Column, k)
+        ori_kwargs = entity.key_values
+        pk_clauses = self.primary_key_clause(cursor, **ori_kwargs)
+        new_kwargs = {**ori_kwargs, **self.convert_value_type(**kwargs)}
 
-            await cursor.execute(entity.table().update().where(self.primary_key_clause(cursor, **entity.key_values)).values(**entity.key_values))
-            return await self.load(cursor, **entity.primary_key_values)
-        else:
-            return entity            
+        await cursor.execute(entity.table().update().where(pk_clauses).values(**new_kwargs))
+        return await self.load(cursor, **entity.primary_key_values)
 
     def _check_allow_to_update(self, kwargs):
         for k in kwargs:

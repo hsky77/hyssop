@@ -6,8 +6,8 @@
 '''
 File created: September 4th 2020
 
-Modified By: hsky77
-Last Updated: December 27th 2020 07:26:46 am
+Modified By: howardlkung
+Last Updated: February 3rd 2021 20:35:32 pm
 '''
 
 Localization_File = 'local.csv'
@@ -17,6 +17,7 @@ LocalCode_No_Valid_DT_FORMAT = 500              # args: (str)
 LocalCode_Not_Allow_Update = 501                # args: (str)
 LocalCode_Must_Be_Type = 502                    # args: (str, Type)
 LocalCode_Invalid_Column = 503                  # args: (str)
+LocalCode_Invalid_Boolean = 504                 # args: (var)
 
 # db util
 LocalCode_Missing_File_Path = 510               # args: ()

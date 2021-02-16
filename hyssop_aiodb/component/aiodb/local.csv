@@ -3,6 +3,7 @@ code,en
 501,{} is not allowed to update
 502,column {} type must be {}
 503,column {} is not valid
+504,value {} is not boolean type
 510,required file_name is missing
 511,required host is missing
 512,required user is missing
