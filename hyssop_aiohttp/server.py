@@ -7,7 +7,7 @@
 File created: November 21st 2020
 
 Modified By: hsky77
-Last Updated: January 7th 2021 19:10:42 pm
+Last Updated: February 3rd 2021 20:25:00 pm
 '''
 
 import os
@@ -49,7 +49,7 @@ class AioHttpRequest(web.Request):
 
         if v:
             return v
-        elif default:
+        elif default is not None:
             return default
         else:
             e = KeyError(name)
@@ -90,6 +90,13 @@ class AioHttpApplication(web.Application, WebApplicationMinin):
                     if not os.path.isdir(path):
                         os.mkdir(path)
                     self.add_routes([web.static(k, path, **v)])
+            if 'www' in self.project_config['aiohttp']:
+                path = self.project_dir + '/' + \
+                    self.project_config['aiohttp']['www']
+                if not os.path.isdir(path):
+                    os.mkdir(path)
+                self.add_routes(
+                    [web.static('/', path)])
             if 'route_decorators' in self.project_config['aiohttp']:
                 try:
                     controller_types = ControllerType.get_controller_enum_class()
