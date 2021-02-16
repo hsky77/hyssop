@@ -23,10 +23,16 @@
 
 ## hyssop-aiohttp
 
+* **0.0.2 - Feb. 15, 2021**:
+  * Fix get_argument() of AioHttpRequest with given default value still raise Exception.
+
 * **0.0.1 - Jan. 10, 2021**:
   * Integrate with [aiohttp](https://docs.aiohttp.org/en/stable/) web framework.
 
 ## hyssop-aiodb
+
+* **0.0.3 - Feb. 15, 2021**:
+  * Fix UW class update bug with bool values.
 
 * **0.0.2 - Feb. 02, 2021**:
   * Add mysql connection proxy pool
