@@ -7,7 +7,7 @@
 File created: November 21st 2020
 
 Modified By: hsky77
-Last Updated: November 21st 2020 23:36:19 pm
+Last Updated: March 3rd 2021 16:53:19 pm
 '''
 
 
@@ -48,7 +48,7 @@ class ProjectMixin():
         self._project_config = {}
         self._component_manager = None
 
-        with open(self.project_config_path, 'r') as f:
+        with open(self.project_config_path, 'r', encoding='utf8') as f:
             import yaml
             from .config_validator import ProjectConfigValidator
             validator = ProjectConfigValidator(

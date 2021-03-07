@@ -12,6 +12,9 @@
 
 ## hyssop
 
+* **1.1.1 - Mar. 06, 2021**:
+  * Fix bugs.
+
 * **1.1.0 - Jan. 10, 2021**:
   * Refactor the project and remove the web framework tornado dependencies. 
 

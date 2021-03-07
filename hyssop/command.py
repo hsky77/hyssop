@@ -7,7 +7,7 @@
 File created: August 21st 2020
 
 Modified By: hsky77
-Last Updated: November 23rd 2020 10:42:02 am
+Last Updated: February 6th 2021 16:30:33 pm
 '''
 
 import os
@@ -253,3 +253,4 @@ exclude:
                 self.project_dir = join_to_abs_path(
                     self.args.project_directory)
                 sys.path.insert(0, os.path.abspath(self.project_dir))
+                sys.path.insert(0, os.path.dirname(os.path.abspath(self.project_dir)))
