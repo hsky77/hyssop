@@ -21,9 +21,10 @@
 File created: January 1st 2021
 
 Modified By: hsky77
-Last Updated: January 2nd 2021 09:16:54 am
+Last Updated: March 4th 2021 19:40:20 pm
 '''
 
+from inspect import iscoroutinefunction
 from typing import Callable
 
 from aiohttp import web
@@ -87,7 +88,10 @@ class AioClientComponent(Component):
         if callable(streaming_callback):
             async with self.async_client.request(method, url, **kwargs) as response:
                 async for chunk in response.content.iter_chunked(chunk_size):
-                    streaming_callback(chunk)
+                    if not iscoroutinefunction(streaming_callback):
+                        streaming_callback(chunk)
+                    else:
+                        await streaming_callback(chunk)
         else:
             async with self.async_client.request(method, url, **kwargs) as response:
                 await response.read()

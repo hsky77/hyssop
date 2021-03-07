@@ -26,6 +26,9 @@
 
 ## hyssop-aiohttp
 
+* **0.0.3 - Mar. 06, 2021**:
+  * Fix bug of aio client streaming callback.
+
 * **0.0.2 - Feb. 15, 2021**:
   * Fix get_argument() of AioHttpRequest with given default value still raise Exception.
 
@@ -34,7 +37,7 @@
 
 ## hyssop-aiodb
 
-* **0.0.4 - Feb. 15, 2021**:
+* **0.0.4 - Mar. 06, 2021**:
   * Fix bug of value convertion in util
 
 * **0.0.3 - Feb. 15, 2021**:
