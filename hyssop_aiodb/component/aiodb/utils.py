@@ -7,7 +7,7 @@
 File created: September 4th 2020
 
 Modified By: hsky77
-Last Updated: February 3rd 2021 20:49:16 pm
+Last Updated: March 5th 2021 15:44:32 pm
 '''
 
 from uuid import UUID
@@ -74,12 +74,13 @@ class DATETIME_TYPE(enum.Enum):
 
 def str_to_datetime(sdt: str) -> datetime:
     """try convert str to datetime with DATETIME_TYPE format until no exception"""
-    for k in DATETIME_TYPE:
-        try:
-            return datetime.strptime(sdt, k.value)
-        except:
-            pass
-    raise IndexError(BaseLocal.get_message(LocalCode_No_Valid_DT_FORMAT, sdt))
+    if sdt:
+        for k in DATETIME_TYPE:
+            try:
+                return datetime.strptime(sdt, k.value)
+            except:
+                pass
+        raise IndexError(BaseLocal.get_message(LocalCode_No_Valid_DT_FORMAT, sdt))
 
 
 def datetime_to_str(dt: datetime, dt_type: DATETIME_TYPE = DATETIME_TYPE.PY) -> str:
@@ -708,6 +709,8 @@ class AsyncEntityUW():
     def value_type_convert(self, t: type, v: Any):
         if isinstance(v, t):
             return v
+        elif v is None:
+            return None
         elif t is datetime:
             return str_to_datetime(v)
         elif t is date:
@@ -722,8 +725,6 @@ class AsyncEntityUW():
                     LocalCode_Invalid_Boolean, v))
         elif issubclass(t, enum.IntEnum):
             return t(int(v))
-        elif v is None:
-            return None
         else:
             return t(v)
 

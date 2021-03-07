@@ -34,6 +34,9 @@
 
 ## hyssop-aiodb
 
+* **0.0.4 - Feb. 15, 2021**:
+  * Fix bug of value convertion in util
+
 * **0.0.3 - Feb. 15, 2021**:
   * Fix UW class update bug with bool values.
 
