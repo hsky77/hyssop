@@ -12,6 +12,9 @@
 
 ## hyssop
 
+* **1.1.2 - Mar. 21, 2021**:
+  * Add parameter "replace_duplicated_code" to Localization import_csv() in util.
+
 * **1.1.1 - Mar. 06, 2021**:
   * Fix bugs.
 

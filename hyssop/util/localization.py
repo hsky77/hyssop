@@ -6,8 +6,8 @@
 '''
 File created: August 21st 2020
 
-Modified By: howardlkung
-Last Updated: December 30th 2020 12:17:41 pm
+Modified By: hsky77
+Last Updated: March 21st 2021 11:59:10 am
 '''
 
 
@@ -51,7 +51,7 @@ class Localization():
         self.import_csv([join_path(dir, f) for f in os.listdir(
             dir) if '.csv' in f and os.path.isfile(join_path(dir, f))])
 
-    def import_csv(self, files: List[str], encoding: str = 'utf-8') -> None:
+    def import_csv(self, files: List[str], encoding: str = 'utf-8', replace_duplicated_code: bool = True) -> None:
         """import coded message from csv file"""
         import re
         for path in files:
@@ -79,8 +79,13 @@ class Localization():
                             self.__mapping[line[0]][lang] = line[idx].replace(
                                 '\n', '')
                         else:
-                            raise KeyError(self.get_message(
-                                LocalCode_Duplicated_Code, line[0], lang))
+                            if replace_duplicated_code:
+                                self.__mapping[line[0]][lang] = line[idx].replace(
+                                    '\n', '')
+                            else:
+                                raise KeyError(self.get_message(
+                                    LocalCode_Duplicated_Code, line[0], lang))
+
                         idx = idx + 1
 
     def has_message(self, code: str) -> bool:
