@@ -7,7 +7,7 @@
 File created: November 21st 2020
 
 Modified By: hsky77
-Last Updated: February 3rd 2021 20:25:00 pm
+Last Updated: March 21st 2021 19:30:13 pm
 '''
 
 import os
@@ -24,7 +24,7 @@ from hyssop_aiohttp.component import AioHttpComponentTypes
 
 add_default_component_types(AioHttpComponentTypes)
 
-add_module_default_logger(['aiohttp.access', 'aiohttp.web'])
+add_module_default_logger(['aiohttp.access', 'aiohttp.web', 'aiohttp.server'])
 
 routes = web.RouteTableDef()
 
