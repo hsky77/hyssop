@@ -7,9 +7,9 @@
 File created: November 21st 2020
 
 Modified By: hsky77
-Last Updated: March 6th 2021 17:42:53 pm
+Last Updated: March 21st 2021 19:32:03 pm
 '''
 
 from .server import AioHttpView, AioHttpRequest, AioHttpApplication, AioHttpServer, routes
 
-Version = '0.0.3'
+Version = '0.0.4'

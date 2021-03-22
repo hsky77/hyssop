@@ -12,8 +12,9 @@
 
 ## hyssop
 
-* **1.1.2 - Mar. 21, 2021**:
+* **1.1.3 - Mar. 21, 2021**:
   * Add parameter "replace_duplicated_code" to Localization import_csv() in util.
+  * Fix bug: logger file path is incorrect
 
 * **1.1.1 - Mar. 06, 2021**:
   * Fix bugs.
@@ -28,6 +29,9 @@
    * Initalize project.
 
 ## hyssop-aiohttp
+
+* **0.0.4 - Mar. 21, 2021**:
+  * Fix bug: add aiohttp.server to default loggers.
 
 * **0.0.3 - Mar. 06, 2021**:
   * Fix bug of aio client streaming callback.
