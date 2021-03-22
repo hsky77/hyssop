@@ -7,7 +7,7 @@
 File created: August 21st 2020
 
 Modified By: hsky77
-Last Updated: November 21st 2020 16:49:06 pm
+Last Updated: March 21st 2021 18:18:45 pm
 '''
 
 import os
@@ -24,12 +24,13 @@ class FileLoggerMixin():
         log_dir = kwargs.get('dir', None)
 
         if log_dir:
-            log_dir = join_path(kwargs.get('root_dir', ''), log_dir, sub_dir)
+            log_dir = join_path(kwargs.get(
+                'project_dir', ''), log_dir, sub_dir)
             if not os.path.isdir(log_dir):
                 os.makedirs(log_dir)
 
-            log_file = join_path(kwargs.get('root_dir', ''),
-                                 log_dir, sub_dir, logger.name)
+            log_file = join_path(kwargs.get('project_dir', ''),
+                                 log_dir, sub_dir, logger.name + '.log')
 
             for h in logger.handlers:
                 if type(h) is logging.FileHandler and h.baseFilename == os.path.abspath(log_file):
@@ -46,10 +47,11 @@ class FileLoggerMixin():
         log_dir = kwargs.get('dir', None)
 
         if log_dir:
-            log_dir = join_path(kwargs.get('root_dir', ''), log_dir, sub_dir)
+            log_dir = join_path(kwargs.get(
+                'project_dir', ''), log_dir, sub_dir)
 
-            log_file = join_path(kwargs.get('root_dir', ''),
-                                 log_dir, sub_dir, logger.name)
+            log_file = join_path(kwargs.get('project_dir', ''),
+                                 log_dir, sub_dir, logger.name + '.log')
 
             for h in logger.handlers:
                 if type(h) is logging.FileHandler and h.baseFilename == os.path.abspath(log_file):
