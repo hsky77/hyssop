@@ -7,7 +7,7 @@
 File created: November 21st 2020
 
 Modified By: hsky77
-Last Updated: March 21st 2021 19:30:13 pm
+Last Updated: March 23rd 2021 00:31:43 am
 '''
 
 import os
@@ -16,6 +16,7 @@ from typing import List, Any
 from multidict import MultiDictProxy
 
 from aiohttp import web
+import aiohttp_cors
 
 from hyssop.project.web import WebApplicationMinin, ControllerType
 from hyssop.project.component import add_module_default_logger, add_default_component_types
@@ -115,6 +116,7 @@ class AioHttpApplication(web.Application, WebApplicationMinin):
 
         self.add_routes(routes)
 
+        # Setup aiohttp swagger
         if 'doc' in self.project_config and type(self.project_config['doc']) is dict:
             from aiohttp_swagger import setup_swagger
 
@@ -127,6 +129,19 @@ class AioHttpApplication(web.Application, WebApplicationMinin):
 
             setup_swagger(self, swagger_url=api_route, description=description,
                           api_version=api_version, title=title, contact=contact)
+
+        # Setup Cors settings
+        if 'cors' in self.project_config:
+            cors_settings = {}
+            for cors_setting in self.project_config['cors']:
+                cors_settings[cors_setting['origin']] = {
+                    k: v for k, v in cors_setting.items() if not k == 'origin'
+                }
+            cors = aiohttp_cors.setup(
+                self, defaults=cors_settings)
+
+            for route in list(self.router.routes()):
+                cors.add(route)
 
     async def after_project_loaded(self, app: web.Application):
         from hyssop.project.component import DefaultComponentTypes
@@ -163,7 +178,7 @@ class AioHttpServer():
                     ssl_context=self.app.project_ssl_context)
 
 
-class AioHttpView(web.View):
+class AioHttpView(web.View, aiohttp_cors.mixin.CorsViewMixin):
     @property
     def request(self) -> AioHttpRequest:
         return super().request

@@ -7,7 +7,7 @@
 File created: November 21st 2020
 
 Modified By: hsky77
-Last Updated: December 30th 2020 17:06:01 pm
+Last Updated: March 23rd 2021 00:28:43 am
 '''
 
 import os
@@ -53,9 +53,9 @@ class HelloControllerTypes(ControllerType):
             f.write('''\
 from aiohttp import web
 
-from hyssop_aiohttp import routes
+from hyssop_aiohttp import routes, AioHttpView
 
-class HelloView(web.View):
+class HelloView(AioHttpView):
     async def get(self):
         """
         ---
@@ -96,6 +96,11 @@ port: 8888
 debug: False
 doc:
   description: hello api
+cors:
+  - origin: '*'
+    allow_credentials: True
+    expose_headers: '*'
+    allow_headers: '*'
 component:
   hello: 
     p1: 'This is p1'

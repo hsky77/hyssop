@@ -7,7 +7,7 @@
 File created: August 21st 2020
 
 Modified By: hsky77
-Last Updated: December 29th 2020 19:40:39 pm
+Last Updated: March 22nd 2021 23:20:40 pm
 '''
 
 import os
@@ -51,6 +51,7 @@ setuptools.setup(
     ],
     install_requires=['hyssop>=' + hy_ver,
                       'aiohttp==3.7.3',
+                      'aiohttp-cors==0.7.0',
                       'aiohttp-swagger==1.0.15'],
     python_requires='>=3.6',
     package_data={'': ['*.yaml', '*.csv']}

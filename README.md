@@ -30,8 +30,9 @@
 
 ## hyssop-aiohttp
 
-* **0.0.4 - Mar. 21, 2021**:
+* **0.0.5 - Mar. 21, 2021**:
   * Fix bug: add aiohttp.server to default loggers.
+  * Add [aiohttp-cors](https://github.com/aio-libs/aiohttp-cors) applys apis and views
 
 * **0.0.3 - Mar. 06, 2021**:
   * Fix bug of aio client streaming callback.
