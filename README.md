@@ -45,8 +45,9 @@
 
 ## hyssop-aiodb
 
-* **0.0.4 - Mar. 06, 2021**:
+* **0.0.5 - Mar. 27, 2021**:
   * Fix bug of value convertion in util
+  * Add timer to reconnect db connections
 
 * **0.0.3 - Feb. 15, 2021**:
   * Fix UW class update bug with bool values.

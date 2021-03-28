@@ -7,7 +7,7 @@
 File created: September 4th 2020
 
 Modified By: hsky77
-Last Updated: March 5th 2021 15:44:32 pm
+Last Updated: March 27th 2021 22:20:55 pm
 '''
 
 from uuid import UUID
@@ -15,7 +15,7 @@ from asyncio import Lock
 from types import TracebackType
 from typing import Dict, List, Any, Tuple, Type, Union, Optional, AsyncGenerator
 import enum
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 from sqlalchemy.dialects.sqlite import pysqlite
 from sqlalchemy.dialects.mysql import pymysql
@@ -80,7 +80,8 @@ def str_to_datetime(sdt: str) -> datetime:
                 return datetime.strptime(sdt, k.value)
             except:
                 pass
-        raise IndexError(BaseLocal.get_message(LocalCode_No_Valid_DT_FORMAT, sdt))
+        raise IndexError(BaseLocal.get_message(
+            LocalCode_No_Valid_DT_FORMAT, sdt))
 
 
 def datetime_to_str(dt: datetime, dt_type: DATETIME_TYPE = DATETIME_TYPE.PY) -> str:
@@ -483,10 +484,18 @@ class AioMysqlCursorProxy(AsyncCursorProxy):
 
 
 class AsyncConnectionProxy():
-    def __init__(self, async_rdb: "AsyncSQLAlchemyRDB"):
+    def __init__(self, async_rdb: "AsyncSQLAlchemyRDB", **kwargs):
         self._async_rdb = async_rdb
         self.reconnect = False
         self.acquire_count = 0
+        self._lock = Lock()
+
+        self.reconnect_seconds = timedelta(
+            seconds=kwargs.get('reconnect_seconds', 30))
+
+    @property
+    def locked(self) -> bool:
+        return self._lock.locked()
 
     async def __aenter__(self):
         await self.acquire()
@@ -503,6 +512,9 @@ class AsyncConnectionProxy():
         raise NotImplementedError()
 
     async def acquire(self):
+        if hasattr(self, 'reconnect_dt') and self.reconnect_dt < datetime.utcnow():
+            self.set_reconnect()
+
         self.acquire_count += 1
 
     async def get_cursor_proxy(self) -> AsyncCursorProxy:
@@ -511,25 +523,27 @@ class AsyncConnectionProxy():
     def release(self):
         self.acquire_count -= 1
 
+    def reset_reconnect_time(self):
+        self.reconnect_dt = datetime.utcnow() + self.reconnect_seconds
+        self.reconnect = False
+
     def set_reconnect(self):
         self.reconnect = True
 
 
 class AioMysqlConnectionProxy(AsyncConnectionProxy):
     def __init__(self, async_rdb: "AsyncSQLAlchemyRDB",
-                 host: str, port: int, user: str, password: str, db_name: str):
-        super().__init__(async_rdb)
+                 host: str, port: int, user: str, password: str, db_name: str, **kwargs):
+        super().__init__(async_rdb, **kwargs)
         self.host = host
         self.port = port
         self.user = user
         self.password = password
         self.db_name = db_name
         self._is_connected = False
-        self._lock = Lock()
+        
 
-    @property
-    def locked(self) -> bool:
-        return self._lock.locked()
+
 
     @property
     def connection(self) -> aiomysql.Connection:
@@ -539,13 +553,13 @@ class AioMysqlConnectionProxy(AsyncConnectionProxy):
         return AioMysqlCursorProxy(self)
 
     async def dispose(self):
-        await self.acquire(False)
+        await self._lock.acquire()
         self._conn.close()
-        self.release()
+        self._lock.release()
 
     async def acquire(self, ping: bool = True):
-        await super().acquire()
         await self._lock.acquire()
+        await super().acquire()
         if self.reconnect and hasattr(self, '_conn'):
             self._conn.close()
             self._is_connected = False
@@ -554,18 +568,20 @@ class AioMysqlConnectionProxy(AsyncConnectionProxy):
             self._is_connected = True
             self._conn = await aiomysql.connect(
                 self.host, self.user, self.password, self.db_name, self.port)
+            self.reset_reconnect_time()
+
         if ping and self._conn:
             await self._conn.ping()
 
     def release(self):
-        self._lock.release()
         super().release()
+        self._lock.release()
 
 
 class AioSqliteConnectionProxy(AsyncConnectionProxy):
-    def __init__(self, async_rdb: "AsyncSQLAlchemyRDB",  file_name: str):
-        super().__init__(async_rdb)
-        self._lock = Lock()
+    def __init__(self, async_rdb: "AsyncSQLAlchemyRDB",  file_name: str, **kwargs):
+        super().__init__(async_rdb, **kwargs)
+        self.file_name = file_name
         self._conn = aiosqlite.connect(file_name)
         self._is_connected = False
 
@@ -573,32 +589,32 @@ class AioSqliteConnectionProxy(AsyncConnectionProxy):
     def connection(self) -> aiosqlite.Connection:
         return self._conn
 
-    @property
-    def locked(self) -> bool:
-        return self._lock.locked()
-
     def get_cursor_proxy(self) -> AioSqliteCursorProxy:
         return AioSqliteCursorProxy(self)
 
     async def acquire(self):
-        await super().acquire()
         await self._lock.acquire()
+        await super().acquire()
         if self.reconnect and hasattr(self, '_conn'):
-            self._conn.close()
+            await self._conn.close()
+            self._conn = aiosqlite.connect(self.file_name)
+            self.reset_reconnect_time()
             self._is_connected = False
 
         if not self._is_connected:
             self._is_connected = True
             await self._conn
+            self.reset_reconnect_time()
 
     def release(self):
-        self._lock.release()
         super().release()
+        self._lock.release()
 
     async def dispose(self):
-        await self.acquire()
-        await self._conn.close()
-        self.release()
+        await self._lock.acquire()
+        if self._is_connected:
+            await self._conn.close()
+        self._lock.release()
 
 
 class AsyncSQLAlchemyRDB():
@@ -632,8 +648,9 @@ class AioMySQLDatabase(AsyncSQLAlchemyRDB):
         self.user = kwargs['user']
         self.password = kwargs['password']
         self.db_name = kwargs['db_name']
+        self.reconnect_seconds = kwargs.get('reconnect_seconds', 30)
 
-        self.max_connections = kwargs.get('connections', 5)
+        self.max_connections = kwargs.get('connections', 1)
         self.pool = []
 
     def get_connection_proxy(self) -> AioMysqlConnectionProxy:
@@ -644,7 +661,7 @@ class AioMySQLDatabase(AsyncSQLAlchemyRDB):
 
         if len(self.pool) < self.max_connections:
             conn_proxy = AioMysqlConnectionProxy(
-                self, self.host, self.port, self.user, self.password, self.db_name)
+                self, self.host, self.port, self.user, self.password, self.db_name, reconnect_seconds=self.reconnect_seconds)
             self.pool.append(conn_proxy)
             return conn_proxy
         else:
@@ -670,7 +687,7 @@ class AioSqliteDatabase(AsyncSQLAlchemyRDB):
         super().__init__(DB_MODULE_NAME.SQLITE_FILE, declared_entity_base, connect_args,
                          engine_args, **kwargs)
         self.connection_proxy = AioSqliteConnectionProxy(
-            self, kwargs['file_name'])
+            self, **kwargs)
 
     def get_connection_proxy(self) -> AioSqliteConnectionProxy:
         return self.connection_proxy
