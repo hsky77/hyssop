@@ -7,7 +7,7 @@
 File created: November 21st 2020
 
 Modified By: hsky77
-Last Updated: March 23rd 2021 00:31:43 am
+Last Updated: March 27th 2021 19:30:30 pm
 '''
 
 import os
@@ -134,9 +134,9 @@ class AioHttpApplication(web.Application, WebApplicationMinin):
         if 'cors' in self.project_config:
             cors_settings = {}
             for cors_setting in self.project_config['cors']:
-                cors_settings[cors_setting['origin']] = {
+                cors_settings[cors_setting['origin']] = aiohttp_cors.ResourceOptions(**{
                     k: v for k, v in cors_setting.items() if not k == 'origin'
-                }
+                })
             cors = aiohttp_cors.setup(
                 self, defaults=cors_settings)
 
