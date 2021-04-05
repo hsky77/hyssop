@@ -7,7 +7,7 @@
 File created: September 4th 2020
 
 Modified By: hsky77
-Last Updated: March 27th 2021 22:20:55 pm
+Last Updated: April 4th 2021 22:02:06 pm
 '''
 
 from uuid import UUID
@@ -52,6 +52,8 @@ def get_declarative_base(key: str = 'default') -> DeclarativeMeta:
 
 class DATETIME_TYPE(enum.Enum):
     PY = '%Y-%m-%d %H:%M:%S.%f'
+    ISO1 = '%Y-%m-%dT%H:%M:%S.%fZ'
+    ISO2 = '%Y/%m/%dT%H:%M:%S.%fZ'
     DTF1 = '%Y-%m-%dT%H:%M:%S.%f'
     DTF2 = '%Y-%m-%d %H:%M:%S.%f'
     DTF3 = '%Y/%m/%dT%H:%M:%S.%f'
@@ -541,9 +543,6 @@ class AioMysqlConnectionProxy(AsyncConnectionProxy):
         self.password = password
         self.db_name = db_name
         self._is_connected = False
-        
-
-
 
     @property
     def connection(self) -> aiomysql.Connection:

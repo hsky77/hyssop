@@ -45,7 +45,7 @@
 
 ## hyssop-aiodb
 
-* **0.0.5 - Mar. 27, 2021**:
+* **0.0.6 - Mar. 27, 2021**:
   * Fix bug of value convertion in util
   * Add timer to reconnect db connections
 
