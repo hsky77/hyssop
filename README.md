@@ -45,8 +45,9 @@
 
 ## hyssop-aiodb
 
-* **0.0.6 - Mar. 27, 2021**:
+* **0.0.7 - Apr. 7, 2021**:
   * Fix bug of value convertion in util
+  * Fix bug of AsyncEntityUW update().
   * Add timer to reconnect db connections
 
 * **0.0.3 - Feb. 15, 2021**:

@@ -7,7 +7,7 @@
 File created: December 26th 2020
 
 Modified By: hsky77
-Last Updated: February 2nd 2021 22:12:59 pm
+Last Updated: April 7th 2021 11:51:37 am
 '''
 
 import enum
@@ -85,7 +85,7 @@ AccountInfoUW = AsyncEntityUW(AccountInfoEntity)
 class AioDBTestCase(UnitTestCase):
     def test(self):
         db = AioSqliteDatabase(
-            SW_MODULES, file_name=__path__[0] + "/testdb.db")
+            SW_MODULES, file_name=__path__[0] + "/testdb.db", reconnect_seconds=0.1)
 
         async def testAsync(index: str):
             async with db.get_connection_proxy() as conn:
@@ -99,6 +99,9 @@ class AioDBTestCase(UnitTestCase):
 
                     if not account:
                         account = await AccountUW.add(cur, **account_data)
+
+                    count = await AccountUW.count(cur)
+                    self.assertEqual(count, 1)
 
                     accounts = await AccountUW.select(cur, **account_data)
                     self.assertEqual(len(accounts), 1)

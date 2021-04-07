@@ -7,7 +7,7 @@
 File created: September 4th 2020
 
 Modified By: hsky77
-Last Updated: April 4th 2021 22:02:06 pm
+Last Updated: April 7th 2021 11:46:46 am
 '''
 
 from uuid import UUID
@@ -19,7 +19,7 @@ from datetime import datetime, date, timedelta
 
 from sqlalchemy.dialects.sqlite import pysqlite
 from sqlalchemy.dialects.mysql import pymysql
-from sqlalchemy import create_engine, Table, Column, and_
+from sqlalchemy import create_engine, Table, Column, and_, func, select
 from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
 from sqlalchemy.sql.elements import BinaryExpression, ClauseElement
 from sqlalchemy.engine.result import ResultMetaData, RowProxy
@@ -767,6 +767,10 @@ class AsyncEntityUW():
         return self.column_clause(cursor, self._entity_cls.non_primary_keys(), **kwargs)
 
     # functions
+    async def count(self, cursor: AsyncCursorProxy) -> int:
+        row = await cursor.fetch_one(select([func.count()]).select_from(self._entity_cls.table()))
+        return row[0]
+
     async def select(self, cursor: AsyncCursorProxy, **kwargs) -> List[SQLAlchemyEntityMixin]:
         """Select database with or without keys and return a list of entities"""
         if len(kwargs) > 0:
@@ -818,7 +822,7 @@ class AsyncEntityUW():
         new_kwargs = {**ori_kwargs, **self.convert_value_type(**kwargs)}
 
         await cursor.execute(entity.table().update().where(pk_clauses).values(**new_kwargs))
-        return await self.load(cursor, **entity.primary_key_values)
+        return await self.load(cursor, **entity.filter_primary_key_values(**new_kwargs))
 
     def _check_allow_to_update(self, kwargs):
         for k in kwargs:
