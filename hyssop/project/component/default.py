@@ -37,7 +37,7 @@ server loads all default components in hyssop.project.component.DefaultComponent
             executor:
                 worker_count: 1      # The maximum of workers is 2
 
-Last Updated: November 22nd 2020 14:48:31 pm
+Last Updated: September 18th 2021 12:19:25 pm
 '''
 
 import logging
@@ -157,7 +157,6 @@ class CallbackComponent(Component):
                     callback_enum_type, callback)
 
     def execute_callback(self, callback_enum_type: Enum, *args, **kwargs) -> None:
-        from tornado.ioloop import IOLoop
         if isinstance(callback_enum_type, Enum):
             enum_cls = type(callback_enum_type)
             if enum_cls in self._callback_manager:
