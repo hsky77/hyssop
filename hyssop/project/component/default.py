@@ -37,14 +37,13 @@ server loads all default components in hyssop.project.component.DefaultComponent
             executor:
                 worker_count: 1      # The maximum of workers is 2
 
-Last Updated: September 18th 2021 12:19:25 pm
+Last Updated: October 9th 2021 14:57:16 pm
 '''
 
 import logging
 
-from datetime import datetime
 from enum import Enum
-from typing import Callable, Any, List, Dict, ByteString
+from typing import Callable, Any, Dict
 
 from . import Component, ComponentManager, ComponentTypes
 from ...util import ExecutorFactory, Executor, Callbacks, configure_colored_logging, join_path, BaseSyncLogger
@@ -121,11 +120,12 @@ class LoggerComponent(FileLoggerMixin, Component):
         return logger
 
     def update_default_logger(self, debug: bool = False) -> None:
-        self.log_level = logging.DEBUG if debug else self.log_level
+        self.log_level = logging.DEBUG if debug else logging.ERROR
 
         for name in self.default_loggers:
             self.get_logger(name)
 
+        self.log_level = logging.DEBUG if debug else logging.INFO
         self.loggers.clear()
 
 

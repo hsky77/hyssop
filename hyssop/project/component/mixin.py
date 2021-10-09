@@ -7,7 +7,7 @@
 File created: August 21st 2020
 
 Modified By: hsky77
-Last Updated: March 21st 2021 18:18:45 pm
+Last Updated: October 9th 2021 14:58:18 pm
 '''
 
 import os
@@ -30,18 +30,22 @@ class FileLoggerMixin():
                 os.makedirs(log_dir)
 
             log_file = join_path(kwargs.get('project_dir', ''),
-                                 log_dir, sub_dir, logger.name + '.log')
+                                 log_dir, logger.name + '.log')
 
+            exist = False
             for h in logger.handlers:
-                if type(h) is logging.FileHandler and h.baseFilename == os.path.abspath(log_file):
-                    h.close()
-                    logger.removeHandler(h)
-                    break
+                if type(h) is logging.FileHandler:
+                    if h.baseFilename == os.path.abspath(log_file):
+                        exist = True
+                    else:
+                        h.close()
+                        logger.removeHandler(h)
 
-            handler = logging.FileHandler(
-                log_file, mode=mode, encoding=encoding)
-            handler.setFormatter(logging.Formatter(LOG_FORMAT))
-            logger.addHandler(handler)
+            if not exist:
+                handler = logging.FileHandler(
+                    log_file, mode=mode, encoding=encoding)
+                handler.setFormatter(logging.Formatter(LOG_FORMAT))
+                logger.addHandler(handler)
 
     def remove_file_handler(self, logger: BaseSyncLogger, sub_dir: str = '', **kwargs):
         log_dir = kwargs.get('dir', None)
