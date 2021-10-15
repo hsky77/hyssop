@@ -7,39 +7,13 @@
 File created: August 21st 2020
 
 Modified By: hsky77
-Last Updated: November 22nd 2020 14:43:18 pm
+Last Updated: October 15th 2021 13:47:00 pm
 '''
 
 import logging
 from threading import Lock
 
-LOG_FORMAT = '%(asctime)s %(levelname)-8s %(name)s  - %(message)s'
-
-
-def configure_colored_logging(loglevel: str = 'INFO', logger: logging.Logger = None) -> None:
-    """
-    note: only call once at the beginning of program
-    """
-    import coloredlogs
-    field_styles = coloredlogs.DEFAULT_FIELD_STYLES.copy()
-    field_styles['asctime'] = {}
-    level_styles = coloredlogs.DEFAULT_LEVEL_STYLES.copy()
-    level_styles['debug'] = {}
-    if logger is not None:
-        coloredlogs.install(
-            level=loglevel,
-            use_chroot=False,
-            fmt=LOG_FORMAT,
-            level_styles=level_styles,
-            field_styles=field_styles,
-            logger=logger)
-    else:
-        coloredlogs.install(
-            level=loglevel,
-            use_chroot=False,
-            fmt=LOG_FORMAT,
-            level_styles=level_styles,
-            field_styles=field_styles)
+LOG_FORMAT = '%(asctime)s %(levelname)-7s %(name)s - %(message)s'
 
 
 class BaseSyncLogger(logging.Logger):
@@ -53,3 +27,4 @@ class BaseSyncLogger(logging.Logger):
 
 
 logging.setLoggerClass(BaseSyncLogger)
+logging.basicConfig(format=LOG_FORMAT)

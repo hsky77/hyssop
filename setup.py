@@ -7,7 +7,7 @@
 File created: August 21st 2020
 
 Modified By: hsky77
-Last Updated: November 22nd 2020 20:47:49 pm
+Last Updated: October 15th 2021 13:52:27 pm
 '''
 
 import os
@@ -46,8 +46,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=['PyYAML>=5.1.1',
-                      'coloredlogs>=10.0'],
+    install_requires=['PyYAML>=5.1.1'],
     python_requires='>=3.6',
     package_data={'': ['*.yaml', '*.csv']}
 )

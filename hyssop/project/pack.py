@@ -7,7 +7,7 @@
 File created: August 20th 2020
 
 Modified By: hsky77
-Last Updated: November 22nd 2020 20:41:28 pm
+Last Updated: October 15th 2021 10:45:29 am
 '''
 
 
@@ -16,7 +16,7 @@ import re
 import sys
 from typing import List, Set, ByteString, Tuple
 
-from hyssop.util import walk_to_file_paths, join_path, configure_colored_logging
+from hyssop.util import walk_to_file_paths, join_path
 
 from .constants import Dependency_Folder, Project_Pack_File, Project_Requirement_File
 
@@ -30,8 +30,6 @@ class HyssopPack(object):
 
     def pack(self, server_folder: str, output_file_path: str, prepare_wheels: bool = False,
              compile_py: bool = True, log_level: str = 'INFO'):
-        configure_colored_logging(log_level)
-
         if output_file_path is None:
             file_name = os.path.basename(os.path.normpath(server_folder))
             if sys.platform == 'win32':

@@ -37,7 +37,7 @@ server loads all default components in hyssop.project.component.DefaultComponent
             executor:
                 worker_count: 1      # The maximum of workers is 2
 
-Last Updated: October 9th 2021 14:57:16 pm
+Last Updated: October 15th 2021 13:43:01 pm
 '''
 
 import logging
@@ -46,7 +46,7 @@ from enum import Enum
 from typing import Callable, Any, Dict
 
 from . import Component, ComponentManager, ComponentTypes
-from ...util import ExecutorFactory, Executor, Callbacks, configure_colored_logging, join_path, BaseSyncLogger
+from ...util import ExecutorFactory, Executor, Callbacks, join_path, BaseSyncLogger
 from .mixin import FileLoggerMixin
 
 
@@ -88,7 +88,6 @@ class LoggerComponent(FileLoggerMixin, Component):
 
     def __init__(self, component_type: ComponentTypes):
         super().__init__(component_type)
-        configure_colored_logging()
         self.loggers = {}
         self.kwargs = None
 
