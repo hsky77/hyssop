@@ -7,7 +7,7 @@
 File created: August 21st 2020
 
 Modified By: hsky77
-Last Updated: October 9th 2021 14:58:18 pm
+Last Updated: October 18th 2021 09:03:51 am
 '''
 
 import os
@@ -29,8 +29,7 @@ class FileLoggerMixin():
             if not os.path.isdir(log_dir):
                 os.makedirs(log_dir)
 
-            log_file = join_path(kwargs.get('project_dir', ''),
-                                 log_dir, logger.name + '.log')
+            log_file = join_path(log_dir, logger.name + '.log')
 
             exist = False
             for h in logger.handlers:
@@ -51,9 +50,6 @@ class FileLoggerMixin():
         log_dir = kwargs.get('dir', None)
 
         if log_dir:
-            log_dir = join_path(kwargs.get(
-                'project_dir', ''), log_dir, sub_dir)
-
             log_file = join_path(kwargs.get('project_dir', ''),
                                  log_dir, sub_dir, logger.name + '.log')
 

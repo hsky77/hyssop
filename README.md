@@ -12,8 +12,11 @@
 
 ## hyssop
 
+* **1.1.5 - Oct. 7, 2021**:
+  * Remove package dependency of "coloredlogs".
+
 * **1.1.4 - Oct. 7, 2021**:
-  * Fix bug logger component: sub folder path of logger file
+  * Fix bug - logger component: sub folder path of logger file.
 
 * **1.1.3 - Mar. 21, 2021**:
   * Add parameter "replace_duplicated_code" to Localization import_csv() in util.

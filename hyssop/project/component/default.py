@@ -37,7 +37,7 @@ server loads all default components in hyssop.project.component.DefaultComponent
             executor:
                 worker_count: 1      # The maximum of workers is 2
 
-Last Updated: October 15th 2021 13:43:01 pm
+Last Updated: October 17th 2021 21:08:35 pm
 '''
 
 import logging
@@ -103,16 +103,15 @@ class LoggerComponent(FileLoggerMixin, Component):
 
         if not logger:
             logger = logging.getLogger(name)
+            self.loggers[name] = logger
 
+        if logger:
             if self.log_to_resources:
                 self.update_file_handler(
                     logger, sub_dir, mode, encoding, **self.kwargs)
             else:
                 self.remove_file_handler(logger, sub_dir, **self.kwargs)
-
-            self.loggers[name] = logger
-
-        if logger:
+                
             logger.setLevel(self.log_level)
             logger.propagate = self.log_echo or echo
 
