@@ -1,0 +1,165 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020-present, the hyssop authors and contributors
+# This file is distributed under the same license as the hyssop package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: hyssop \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-10-27 12:31-0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: ../../hyssop_aiohttp.rst:2
+msgid "hyssop-aiohttp"
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:5
+msgid "Table of Contents"
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:7
+msgid ""
+"**hyssop-aiohttp** is the hyssop extension that bases `aiohttp "
+"<https://docs.aiohttp.org/en/stable/>`__ and related packages to "
+"implement http interfaces of components."
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:9
+msgid "**prerequests**: python 3.6+, pip"
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:11
+msgid ""
+"**dependencies**: `aiohttp <https://docs.aiohttp.org/en/stable/>`__, "
+"`aiohttp-swagger <https://aiohttp-swagger.readthedocs.io/en/latest/>`__, "
+"`aiohttp-cors <https://github.com/aio-libs/aiohttp-cors>`__"
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:13
+msgid "**Install** hyssop_aiohttp with pip: ``pip install hyssop_aiohttp``"
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:16
+msgid "Extended Functionalities"
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:18
+msgid ""
+"Add async functions ``on_before_server_start`` to Component classes which"
+" runs after ``Component.init()`` and before aiohttp server start."
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:20
+msgid ""
+"Add \"start\" command to run api server by typing ``python3 -m "
+"hyssop_aiohttp start <path of your project directory>``"
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:22
+msgid ""
+"Add reserved directory named \"controller\" as the package of aiohttp api"
+" handlers into hyssop project."
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:31
+msgid "Changes of configurations with aiohttp related packages:"
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:58
+msgid "**port**: Port of aiohttp api server"
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:59
+msgid "**debug**: Aiohttp api server debug mode"
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:60
+msgid ""
+"**doc**: Settings of `aiohttp-swagger <https://aiohttp-"
+"swagger.readthedocs.io/en/latest/>`__"
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:61
+msgid ""
+"**cors**: Settings of `aiohttp-cors <https://github.com/aio-libs/aiohttp-"
+"cors>`__"
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:62
+msgid "**controller**: Api Sub_routes"
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:65
+msgid "**aiohttp**: Settings of aiohttp"
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:64
+msgid ""
+"**route_decorators**: Keys of ControllerType to load handlers into "
+"aiohttp routes"
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:68
+msgid "Usage"
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:70
+msgid "**Create hyssop-aiohttp project**:"
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:72
+msgid ""
+"Create project named hello by typing ``python3 -m hyssop_aiohttp create "
+"hello``, the project hierarchy looks like the following block:"
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:90
+msgid "**Implement controllers**:"
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:92
+msgid ""
+"Add HelloControllerTypes inherits from ControllerType into the file "
+"``controller/__init__.py``."
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:102
+msgid "Implement the handlers classes or functions."
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:146
+msgid "Configurations:"
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:159
+msgid "Test the handlers:"
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:161
+msgid ""
+"Run the api server by typing ``python3 -m hyssop_aiohttp start hello`` in"
+" command prompt."
+msgstr ""
+
+#: ../../hyssop_aiohttp.rst:162
+msgid ""
+"Click `http://localhost:8888/hello <http://localhost:8888/hell>`__, "
+"`http://localhost:8888/hello_view <http://localhost:8888/hello_view>`__"
+msgstr ""
+
+#~ msgid ""
+#~ "**hyssop-aiohttp** is the hyssop "
+#~ "extension that integrates `aiohttp "
+#~ "<https://docs.aiohttp.org/en/stable/>`__ and related "
+#~ "packages to implement http interfaces of"
+#~ " components."
+#~ msgstr ""
+

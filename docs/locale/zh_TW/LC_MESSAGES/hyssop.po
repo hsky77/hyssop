@@ -1,0 +1,123 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020-present, the hyssop authors and contributors
+# This file is distributed under the same license as the hyssop package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: hyssop \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-10-27 09:33-0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: ../../hyssop.rst:2
+msgid "hyssop"
+msgstr ""
+
+#: ../../hyssop.rst:5
+msgid "Table of Contents"
+msgstr "大綱"
+
+#: ../../hyssop.rst:7
+msgid ""
+"**hyssop** is a python project that defines project hierarchy and creates"
+" scalable component architecture which is configurable in yaml format."
+msgstr "**hyssop** 是一個純 python 專案，定義了專案項目層次並建立了在 yaml 格式文件中配置的可擴展組件架構。"
+
+#: ../../hyssop.rst:9
+msgid "**prerequest**: python 3.6+, pip"
+msgstr ""
+
+#: ../../hyssop.rst:11
+msgid "**Install** hyssop with pip: ``pip install hyssop``"
+msgstr ""
+
+#: ../../hyssop.rst:15
+msgid "Hierarchy of Project"
+msgstr "專案資料夾結構"
+
+#: ../../hyssop.rst:30
+msgid "Commands"
+msgstr "指令"
+
+#: ../../hyssop.rst:49
+msgid "How to create components?"
+msgstr "建立組件"
+
+#: ../../hyssop.rst:51
+msgid ""
+"The **hyssop** projects reserve the directories named **component**, and "
+"**unit_test** as the packages of Component classes, and Unit Test cases. "
+"It's similar to how python defines and imports packages which contain the"
+" files of ``__init__.py``."
+msgstr "**hyssop** 視專案中名為 **component** 的資料夾為組件，**unit_test** 為單元測試案例，它們如同python的套件內含了 ``__init__.py`` 檔案"
+
+#: ../../hyssop.rst:54
+msgid ""
+"To get start, create a template project named \"hello\" by typing "
+"command: ``python3 -m hyssop create hello``"
+msgstr "開始時，在命令提示列輸入 ``python3 -m hyssop create hello`` 產生專案資料夾"
+
+#: ../../hyssop.rst:56
+msgid "The project directory should looks like:"
+msgstr "專案結構如下:"
+
+#: ../../hyssop.rst:69
+msgid ""
+"``component/__init__.py`` defines the subclasses of ``ComponentTypes`` "
+"that specfies the import pathes. The values are ``listes`` or ``tuples`` "
+"store ``keys in project_config.yml``, ``modules``, ``classes or "
+"functions``."
+msgstr "``component/__init__.py`` 定義繼承 ``ComponentTypes`` 的 class，提供 **hyssop** 識別載入對應組件的路徑，其值為 **tuple** 類型包含了 <key in project_config.yml>, <path of modules>, <path of class or function>。"
+
+#: ../../hyssop.rst:82
+msgid ""
+"In ``component/hello.py``, it defines the ``HelloComponent`` inherits "
+"from ``Component`` class."
+msgstr "``component/hello.py`` 定義繼承 ``Component`` 的 ``HelloComponent`` 組件實作。"
+
+#: ../../hyssop.rst:97
+msgid ""
+"In ``project_config.yml``, add the key **'hello'** under component block."
+" That indicates ``HelloComponent`` should be loaded."
+msgstr "``project_config.yml`` 設定 **hyssop** 初始組件 hello 與其參數 p1。"
+
+#: ../../hyssop.rst:112
+msgid "How to test components?"
+msgstr "測試組件"
+
+#: ../../hyssop.rst:114
+msgid ""
+"``unit_test/__init__.py`` defines the subclasses of ``UnitTestTypes`` "
+"that specfies the import path of test cases."
+msgstr "``unit_test/__init__.py`` 定義繼承 ``UnitTestTypes`` 的class，提供**hyssop** 識別載入對應測試案例的路徑，其值為 **tuple** 類型包含了 <key in project_config.yml>, <path of modules>, <path of test case>。"
+
+#: ../../hyssop.rst:125
+msgid ""
+"In ``unit_test/ut1.py``, it defines the ``UT1TestCase`` inherits from "
+"``UnitTestCase`` class."
+msgstr "``unit_test/ut1.py`` 定義繼承 ``UT1TestCase`` 的測試案例實作。"
+
+#: ../../hyssop.rst:146
+msgid ""
+"Then, type the command ``python3 -m hyssop test hello`` to run all the "
+"test cases which define in ``unit_test/__init__.py``."
+msgstr "在命令提示列輸入 ``python3 -m hyssop test hello`` 執行所有在 ``unit_test/__init__.py`` 的測試案例。"
+
+#: ../../hyssop.rst:149
+msgid "Configuration Validator"
+msgstr "組件設定驗證"
+
+#: ../../hyssop.rst:151
+msgid ""
+"**hyssop** provides `configurations validator <web_refer.html"
+"#configuration-validator>`__ verifies the configurations. The following "
+"example shows how validator of HelloComponent could be customized."
+msgstr "**hyssop** 提供了驗證組件設定的工具，請參考下面範例。"

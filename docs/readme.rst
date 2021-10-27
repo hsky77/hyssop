@@ -1,8 +1,7 @@
 hyssop
 =================
 
-**hyssop** is a pure python project that adds simple, scalable, and configurable component architecture to opensource web frameworks.
-It's currently based on `Tornado Web Server <https://www.tornadoweb.org/en/stable/>`__.
+**hyssop** is a python project that defines project hierarchy and creates scalable component architecture which is configurable in yaml format.
 
 **prerequest**: python 3.6+, pip
 

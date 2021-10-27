@@ -1,0 +1,77 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020-present, the hyssop authors and contributors
+# This file is distributed under the same license as the hyssop package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: hyssop \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-10-27 12:31-0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: ../../hyssop_aiodb.rst:2
+msgid "hyssop-aiodb"
+msgstr ""
+
+#: ../../hyssop_aiodb.rst:5
+msgid "Table of Contents"
+msgstr ""
+
+#: ../../hyssop_aiodb.rst:7
+msgid ""
+"**hyssop-aiodb** provides the hyssop components that integrates "
+"sqlalchemy, aiomysql, aiosqlite to access SQL database asynchronously."
+msgstr ""
+
+#: ../../hyssop_aiodb.rst:9
+msgid "**prerequest**: python 3.6+, pip"
+msgstr ""
+
+#: ../../hyssop_aiodb.rst:11
+msgid "**Install** hyssop with pip: ``pip install hyssop_aiodb``"
+msgstr ""
+
+#: ../../hyssop_aiodb.rst:15
+msgid "Usage"
+msgstr ""
+
+#: ../../hyssop_aiodb.rst:17
+msgid "Add the AioDBComponentTypes into ``component/__init__.py`` of your hyssop project."
+msgstr ""
+
+#: ../../hyssop_aiodb.rst:25
+msgid ""
+"If your component has to depend on AioDBComponent, you could do the "
+"following way to be sure the object of AioDBComponent will be initialized"
+" at the first cleaned up at the last."
+msgstr ""
+
+#: ../../hyssop_aiodb.rst:37
+msgid "Configuration"
+msgstr ""
+
+#: ../../hyssop_aiodb.rst:57
+msgid "Define the orm class of sqlalchemy."
+msgstr ""
+
+#: ../../hyssop_aiodb.rst:74
+msgid "Access database by AioDBComponent."
+msgstr ""
+
+#~ msgid ""
+#~ "Add the ComponentTypes into "
+#~ "``component/__init__.py`` of your hyssop "
+#~ "project."
+#~ msgstr ""
+
+#~ msgid "Simple Usage"
+#~ msgstr ""
+
