@@ -7,9 +7,9 @@
 File created: August 21st 2020
 
 Modified By: hsky77
-Last Updated: October 15th 2021 13:55:10 pm
+Last Updated: May 7th 2022 09:01:46 am
 '''
 
 
 Module_Path = __path__[0]
-Version = '1.1.5'
+Version = '1.1.6'

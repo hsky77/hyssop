@@ -7,7 +7,7 @@
 File created: August 21st 2020
 
 Modified By: hsky77
-Last Updated: March 21st 2021 11:59:10 am
+Last Updated: May 7th 2022 09:24:22 am
 '''
 
 
@@ -100,12 +100,20 @@ class Localization():
                 'language: {}, code: {} does not exist'.format(self.__lang, code))
 
         if code in self.__mapping:
+            lang = self.__lang
+            if not self.__lang in self.__mapping[code]:
+                lang = 'en'
+
             try:
-                return self.__mapping[code][self.__lang].format(*strings)
+                return self.__mapping[code][lang].format(*strings)
             except:
-                return self.__mapping[str(LocalCode_Message_Format_Invalid)][self.__lang].format(code, strings)
+                return self.__mapping[str(LocalCode_Message_Format_Invalid)][lang].format(code, strings)
         else:
-            return self.__mapping[self.default_code][self.__lang].format(self.__lang, code)
+            lang = self.__lang
+            if not self.__lang in self.__mapping[self.default_code]:
+                lang = 'en'
+
+            return self.__mapping[self.default_code][lang].format(self.__lang, code)
 
 
 BaseLocal = Localization()

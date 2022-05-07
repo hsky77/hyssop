@@ -2,7 +2,7 @@
 
 [![Documentation Status](https://readthedocs.org/projects/hyssop/badge/?version=latest)](https://hyssop.readthedocs.io/en/latest/?badge=latest) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![PyPI version](https://img.shields.io/pypi/v/hyssop.svg)](https://pypi.org/project/hyssop/)
 
-**hyssop** is a pure python project implements component-based architecture and project hierarchy.
+**hyssop** is a python project that defines project hierarchy and creates scalable component architecture which is configurable in yaml format file.
 
 **prerequest**: python 3.6+, pip
 
@@ -11,6 +11,9 @@
 # Change log 
 
 ## hyssop
+
+* **1.1.6 - May. 7, 2022**:
+  * Localization: using default language messages if the localized message does not exist.
 
 * **1.1.5 - Oct. 7, 2021**:
   * Remove package dependency of "coloredlogs".
@@ -35,6 +38,9 @@
    * Initalize project.
 
 ## hyssop-aiohttp
+
+* **0.0.7 - Sep. 18, 2021**:
+  * Fix bugs of loading aiohttp route_decorators
 
 * **0.0.6 - Mar. 27, 2021**:
   * Fix bug: add aiohttp.server to default loggers.

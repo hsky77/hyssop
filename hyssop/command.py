@@ -7,7 +7,7 @@
 File created: August 21st 2020
 
 Modified By: hsky77
-Last Updated: February 6th 2021 16:30:33 pm
+Last Updated: October 25th 2021 09:14:48 am
 '''
 
 import os
@@ -139,13 +139,7 @@ class HelloComponent(Component):
 ''')
 
     def _create_project_controller_files(self):
-        if not os.path.isdir(self.project_controller_dir):
-            os.makedirs(self.project_controller_dir)
-
-        with open(join_path(self.project_controller_dir, '__init__.py'), 'w') as f:
-            f.write('''\
-from hyssop.project.web import ControllerType
-''')
+        pass
 
     def _create_project_test_files(self):
         if not os.path.isdir(self.project_unitetest_dir):
@@ -253,4 +247,5 @@ exclude:
                 self.project_dir = join_to_abs_path(
                     self.args.project_directory)
                 sys.path.insert(0, os.path.abspath(self.project_dir))
-                sys.path.insert(0, os.path.dirname(os.path.abspath(self.project_dir)))
+                sys.path.insert(0, os.path.dirname(
+                    os.path.abspath(self.project_dir)))
