@@ -12,6 +12,9 @@
 
 ## hyssop
 
+* **1.1.6.1 - May. 7, 2022**:
+  * Fix bug of loading components
+
 * **1.1.6 - May. 7, 2022**:
   * Localization: using default language messages if the localized message does not exist.
   * Fix bug of component manager gets component failed when importing the same component type with different pathes that create different instances

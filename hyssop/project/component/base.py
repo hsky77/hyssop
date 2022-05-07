@@ -9,7 +9,7 @@ File created: August 21st 2020
 This module defines the base component classes
 
 Modified By: hsky77
-Last Updated: May 7th 2022 10:44:04 am
+Last Updated: May 7th 2022 14:50:46 pm
 '''
 
 
@@ -155,7 +155,7 @@ class ComponentManager():
             reverse_array = [k for k in reversed([y.enum_key for y in x])]
             if reverse_array is not None:
                 orders = orders + reverse_array
-        self.__components = {x: self.__components[x] for x in orders}
+        self.__components = {x: self.__components[x] for x in orders if x in self.__components}
 
     def __get_component_key(self, enum_type: Union[str, ComponentTypes]) -> str:
         if isinstance(enum_type, ComponentTypes):
