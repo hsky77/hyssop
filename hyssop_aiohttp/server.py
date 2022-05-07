@@ -7,11 +7,12 @@
 File created: November 21st 2020
 
 Modified By: hsky77
-Last Updated: March 27th 2021 19:30:30 pm
+Last Updated: May 7th 2022 10:01:06 am
 '''
 
 import os
 import inspect
+import asyncio
 from typing import List, Any
 from multidict import MultiDictProxy
 
@@ -35,28 +36,29 @@ class AioHttpRequest(web.Request):
     def app(self) -> "AioHttpApplication":
         return super().app
 
-    async def get_argument(self, name: str, default: Any = None) -> Any:
-        if self.method in ['GET', 'DELETE']:
-            v = self.query.get(name, default)
-        elif self.method in ['POST', 'PUT']:
-            if not hasattr(self, '_parsed_body'):
-                if self.content_type == 'application/json':
-                    self._parsed_body = await self.json()
-                else:
-                    self._parsed_body = await self.post()
-            v = self._parsed_body.get(name, default)
-        else:
-            raise web.HTTPBadRequest()
+    async def get_argument(self, name: str, *default) -> Any:
+        """
+        Get argument from query string or body data. Return default or raise HTTPBadRequest exception if that does not exist.
+        """
+        if not hasattr(self, '_parsed_body'):
+            if self.content_type == 'application/json':
+                self._parsed_body = await self.json()
+            else:
+                self._parsed_body = await self.post()
 
-        if v:
-            return v
-        elif default is not None:
-            return default
+        data = {**self.query, **self._parsed_body}
+        if name in data:
+            return data[name]
         else:
-            e = KeyError(name)
-            raise web.HTTPBadRequest(text=str(e))
+            if len(default) > 0:
+                return default[0]
+            else:
+                raise web.HTTPBadRequest(text=str(KeyError(name)))
 
     async def get_arguments_dict(self, args: List[str] = None) -> MultiDictProxy:
+        """
+        Get arguments dict from query string or body data with indicated args.
+        """
         if not hasattr(self, '_parsed_body'):
             if self.content_type == 'application/json':
                 self._parsed_body = await self.json()
@@ -99,20 +101,26 @@ class AioHttpApplication(web.Application, WebApplicationMinin):
                 self.add_routes(
                     [web.static('/', path)])
             if 'route_decorators' in self.project_config['aiohttp']:
-                try:
-                    controller_types = ControllerType.get_controller_enum_class()
-                    for key in self.project_config['aiohttp']['route_decorators']:
-                        for controller_type in controller_types:
-                            try:
-                                type_cls = controller_type(key)
-                                try:
-                                    _ = type_cls.import_class()
-                                except:
-                                    _ = type_cls.import_function()
-                            except:
-                                continue
-                except:
-                    pass
+                controller_types = ControllerType.get_controller_enum_class()
+                for key in self.project_config['aiohttp']['route_decorators']:
+                    if len(controller_types) < 1:
+                        raise KeyError(key)
+
+                    type_cls = None
+                    for controller_type in controller_types:
+                        try:
+                            type_cls = controller_type(key)
+                            break
+                        except:
+                            continue
+
+                    if type_cls:
+                        try:
+                            _ = type_cls.import_class()
+                        except:
+                            _ = type_cls.import_function()
+                    else:
+                        raise KeyError(key)
 
         self.add_routes(routes)
 

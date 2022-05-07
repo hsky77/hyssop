@@ -14,6 +14,7 @@
 
 * **1.1.6 - May. 7, 2022**:
   * Localization: using default language messages if the localized message does not exist.
+  * Fix bug of component manager gets component failed when importing the same component type with different pathes that create different instances
 
 * **1.1.5 - Oct. 7, 2021**:
   * Remove package dependency of "coloredlogs".
@@ -39,8 +40,8 @@
 
 ## hyssop-aiohttp
 
-* **0.0.7 - Sep. 18, 2021**:
-  * Fix bugs of loading aiohttp route_decorators
+* **0.0.7 - May. 7, 2022**:
+  * Fix exceptions does not raise when loading aiohttp route_decorators
 
 * **0.0.6 - Mar. 27, 2021**:
   * Fix bug: add aiohttp.server to default loggers.

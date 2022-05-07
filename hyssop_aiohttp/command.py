@@ -7,7 +7,7 @@
 File created: November 21st 2020
 
 Modified By: hsky77
-Last Updated: March 23rd 2021 00:28:43 am
+Last Updated: October 27th 2021 09:28:05 am
 '''
 
 import os
@@ -15,6 +15,7 @@ import os
 from hyssop.util import join_path
 from hyssop.command import CommandProcessor
 
+from . import Version
 
 class AioHttpCommandProcessor(CommandProcessor):
     Command_Start_Server = 'start'
@@ -25,9 +26,7 @@ class AioHttpCommandProcessor(CommandProcessor):
         start_parser = self.command_parsers.add_parser(
             AioHttpCommandProcessor.Command_Start_Server, help='start server with specfied server project directory path')
         start_parser.add_argument(self.args_key_project_directory,
-                                  help='server project directory path')
-        start_parser.add_argument('-s', '--http_server', action='store_true',
-                                  help='start application on tornado http server')
+                                  help='path of server project directory')
         start_parser.set_defaults(
             command=AioHttpCommandProcessor.Command_Start_Server)
 
@@ -35,6 +34,9 @@ class AioHttpCommandProcessor(CommandProcessor):
         from .server import AioHttpServer
         server = AioHttpServer(self.project_dir)
         server.start()
+
+    def version(self):
+        print('hyssop-aiohttp {}'.format(Version))
 
     def _create_project_controller_files(self):
         if not os.path.isdir(self.project_controller_dir):
@@ -55,6 +57,8 @@ from aiohttp import web
 
 from hyssop_aiohttp import routes, AioHttpView
 
+from component import HelloComponentTypes
+
 class HelloView(AioHttpView):
     async def get(self):
         """
@@ -69,7 +73,8 @@ class HelloView(AioHttpView):
             200:
                 description: return hello view message
         """
-        return web.Response(text="Hello, world view")
+        comp = self.request.app.component_manager.get_component(HelloComponentTypes.Hello)
+        return web.Response(text=comp.hello())
 
 @routes.get('/hello')
 async def hello(request):
@@ -85,7 +90,8 @@ async def hello(request):
         200:
             description: return hello message
     """
-    return web.Response(text="Hello, world")
+    comp = request.app.component_manager.get_component(HelloComponentTypes.Hello)    
+    return web.Response(text=comp.hello())
 ''')
 
     def _create_project_config_files(self):
