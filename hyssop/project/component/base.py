@@ -9,10 +9,11 @@ File created: August 21st 2020
 This module defines the base component classes
 
 Modified By: hsky77
-Last Updated: January 7th 2021 19:17:20 pm
+Last Updated: May 7th 2022 10:44:04 am
 '''
 
 
+from audioop import reverse
 from typing import Dict, Tuple, Any, Union, List
 from inspect import iscoroutinefunction
 
@@ -39,6 +40,7 @@ class Component():
 
     def __init__(self, component_type: ComponentTypes):
         self.component_type = component_type
+        self.component_key = component_type.enum_key
 
     def init(self, component_manager, *arugs, **kwargs) -> None:
         """called when component_manager create component objects"""
@@ -106,7 +108,7 @@ class ComponentManager():
                             (component.component_type, func(*arugs, **kwargs)))
         return result
 
-    def invoke(self, enum_type: ComponentTypes, method: str, *arugs, **kwargs) -> Any:
+    def invoke(self, enum_type: Union[str, ComponentTypes], method: str, *arugs, **kwargs) -> Any:
         """execute component mehtod by giving the method name and arguments"""
         component = self.get_component(enum_type)
         func = getattr(component, method, None)
@@ -114,7 +116,7 @@ class ComponentManager():
             if not iscoroutinefunction(func):
                 return func(*arugs, **kwargs)
 
-    async def invoke_async(self, enum_type: ComponentTypes, method: str, *arugs, **kwargs) -> Any:
+    async def invoke_async(self, enum_type: Union[str, ComponentTypes], method: str, *arugs, **kwargs) -> Any:
         """asynchronously execute component mehtod by giving the method name and arguments"""
         component = self.get_component(enum_type)
         func = getattr(component, method, None)
@@ -125,21 +127,22 @@ class ComponentManager():
     def set_component(self, component: Component) -> None:
         """add or replace component object"""
         if isinstance(component, Component):
-            self.__components[component.component_type] = component
+            self.__components[component.component_key] = component
         else:
             raise TypeError(BaseLocal.get_message(
                 LocalCode_Not_Subclass, type(component), Component))
 
-    def get_component(self, enum_type: ComponentTypes) -> Union[Component, None]:
-        """return stored component object or None"""
-        if enum_type in self.__components:
-            return self.__components[enum_type]
+    def get_component(self, enum_type: Union[str, ComponentTypes]) -> Component:
+        """return stored component object"""
+        key = self.__get_component_key(enum_type)
+        if key in self.__components:
+            return self.__components[key]
 
         raise KeyError(BaseLocal.get_message(
             LocalCode_Component_Type_Not_Exist, enum_type))
 
-    def has_component(self, enum_type: ComponentTypes) -> bool:
-        return enum_type in self.__components
+    def has_component(self, enum_type: Union[str, ComponentTypes]) -> bool:
+        return self.__get_component_key(enum_type) in self.__components
 
     def sort_components(self, order_list: List[ComponentTypes]):
         """
@@ -149,8 +152,12 @@ class ComponentManager():
         """
         orders = []
         for x in order_list:
-            orders = orders + [y.enum_key for y in x]
+            reverse_array = [k for k in reversed([y.enum_key for y in x])]
+            if reverse_array is not None:
+                orders = orders + reverse_array
+        self.__components = {x: self.__components[x] for x in orders}
 
-        sorted_keys = sorted(self.__components, key=lambda k: (
-            orders.index(k.enum_key), orders.index(k.enum_key)))
-        self.__components = {x: self.__components[x] for x in sorted_keys}
+    def __get_component_key(self, enum_type: Union[str, ComponentTypes]) -> str:
+        if isinstance(enum_type, ComponentTypes):
+            return enum_type.enum_key
+        return enum_type
