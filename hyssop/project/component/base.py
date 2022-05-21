@@ -9,7 +9,7 @@ File created: August 21st 2020
 This module defines the base component classes
 
 Modified By: hsky77
-Last Updated: May 7th 2022 14:50:46 pm
+Last Updated: May 21st 2022 10:04:13 am
 '''
 
 
@@ -59,6 +59,7 @@ class ComponentManager():
 
     def __init__(self):
         self.__components = {}
+        self.__dispose_components = {}
 
     @property
     def components(self) -> List[Component]:
@@ -72,7 +73,14 @@ class ComponentManager():
         return info
 
     async def dispose_components(self) -> None:
-        return await self.boardcast_async('dispose', self)
+        for component in self.__dispose_components.values():
+            if hasattr(component, 'dispose'):
+                func = getattr(component, 'dispose')
+                if callable(func):
+                    if not iscoroutinefunction(func):
+                        func(self)
+                    else:
+                        await func(self)
 
     def boardcast(self, method: str, *arugs, **kwargs) -> List[Tuple[ComponentTypes, Any]]:
         """
@@ -144,7 +152,7 @@ class ComponentManager():
     def has_component(self, enum_type: Union[str, ComponentTypes]) -> bool:
         return self.__get_component_key(enum_type) in self.__components
 
-    def sort_components(self, order_list: List[ComponentTypes]):
+    def set_dispose_components(self, order_list: List[ComponentTypes]):
         """
         sort component object by "order_list". default sorting with ComponentTypes order
 
@@ -155,7 +163,8 @@ class ComponentManager():
             reverse_array = [k for k in reversed([y.enum_key for y in x])]
             if reverse_array is not None:
                 orders = orders + reverse_array
-        self.__components = {x: self.__components[x] for x in orders if x in self.__components}
+        self.__dispose_components = {
+            x: self.__components[x] for x in orders if x in self.__components}
 
     def __get_component_key(self, enum_type: Union[str, ComponentTypes]) -> str:
         if isinstance(enum_type, ComponentTypes):

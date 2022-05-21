@@ -8,9 +8,12 @@
 
 **Install** hyssop with pip: ``pip install hyssop``
 
-# Change log 
+# Change logs
 
 ## hyssop
+
+* **1.1.7 - May. 21, 2022**:
+  * refactor loading and disposing components in order
 
 * **1.1.6.1 - May. 7, 2022**:
   * Fix bug of loading components

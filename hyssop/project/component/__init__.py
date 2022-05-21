@@ -44,7 +44,7 @@ This module contains the "yaml" configurable component classes for hyssop applic
                     p1: xxxx        # parameter p1 of Foo.init()
 
 Modified By: hsky77
-Last Updated: January 17th 2021 17:56:39 pm
+Last Updated: May 21st 2022 09:59:28 am
 '''
 
 from typing import Dict, List, Union
@@ -162,8 +162,8 @@ def create_component_manager(project_dir: str, component_settings: Union[Dict, N
                 raise ImportError(BaseLocal.get_message(
                     LocalCode_Failed_To_Load_Component, project_dir, key))
 
-    # sort with enums order
-    component_manager.sort_components(sort_types)
+    # set with enums order for dispose
+    component_manager.set_dispose_components(sort_types)
 
     return component_manager
 
