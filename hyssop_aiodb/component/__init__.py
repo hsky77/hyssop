@@ -7,10 +7,12 @@
 File created: December 26th 2020
 
 Modified By: hsky77
-Last Updated: January 8th 2021 13:24:27 pm
+Last Updated: June 1st 2022 12:16:18 pm
 '''
 
 from hyssop.project.component import ComponentTypes
+
+from .aiodb_mixin import AiodbComponentMixin
 
 
 class AioDBComponentTypes(ComponentTypes):
