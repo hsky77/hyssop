@@ -99,6 +99,13 @@ class ComponentManager:
             info[component.name] = component.info()
         return info
 
+    async def start_components(self):
+        """Start components."""
+        for component_cls in self.component_classes:
+            comp = self._get_component(component_cls.name)
+            if comp is not None:
+                await comp.start()
+
     async def dispose_components(self):
         """Dispose components."""
         for component_cls in self.component_classes_in_disposing_order:
@@ -201,4 +208,4 @@ class ComponentManager:
         elif isclass(component):
             if not issubclass(component, Component):
                 raise TypeError(BaseLocal.get_message(LocalCode_Not_Subclass, type(component), Component))
-            return self.__components.get(component.name)
+            return next((v for v in self.__components.values() if isinstance(v, component)), None)

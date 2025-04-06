@@ -10,13 +10,12 @@ Modified By: hsky77
 Last Updated: April 4th 2025 16:54:20 pm
 """
 
-import os
 import argparse
+import os
 
-from . import Version
-from .utils.func import join_path, join_to_abs_path
+from . import Module_Path, Version
 from .project import HyssopProject
-from . import Module_Path
+from .utils.func import join_path, join_to_abs_path
 
 
 class CommandProcessor:
@@ -30,6 +29,9 @@ class CommandProcessor:
     def __init__(self):
         self.project_dir = Module_Path
         self.__create_command_parser()
+
+    def create_project(self):
+        self.project = HyssopProject(self.project_dir)
 
     def process_command(self):
         self.__parse_command()
@@ -48,12 +50,11 @@ class CommandProcessor:
         import unittest
 
         # import coverage
-
-        project = HyssopProject(self.project_dir)
+        self.create_project()
         runner = unittest.TextTestRunner()
         # cov = coverage.Coverage()
         # cov.start()
-        runner.run(project.cretae_test_suite())
+        runner.run(self.project.cretae_test_suite())
         # cov.stop()
         # cov.save()
         # cov.report()
@@ -75,7 +76,7 @@ class CommandProcessor:
 
     def create(self):
         self.project_dir = self.project_dir if self.project_dir else "hello_world"
-        self.project = HyssopProject(self.project_dir)
+        self.create_project()
 
         if not os.path.isdir(self.project_dir):
             os.makedirs(self.project_dir)
@@ -200,7 +201,7 @@ exclude:
 
     def _create_project_requirement_files(self):
         # requirement
-        from . import __name__, Version
+        from . import Version, __name__
 
         with open(self.project.requirement_file, "w") as f:
             f.write("{}>={}".format(__name__, Version))

@@ -26,7 +26,7 @@ class TestCaseComponent(IUnitTestCase):
         config = {
             "name": "hyssop project unit test",
             "component": {
-                "localization": {"lang": "en", "dir": "component"},
+                "localization": {"lang": "en"},
                 "logger": {
                     "log_level": DEBUG,
                     "log_to_console": True,

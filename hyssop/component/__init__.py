@@ -124,9 +124,5 @@ def create_component_manager(
     return component_manager
 
 
-def add_module_default_logger(logger_names: List[str]) -> None:
-    LoggerComponent.default_loggers = LoggerComponent.default_loggers + logger_names
-
-
 def add_default_component_types(module_path: str):
     default_component_module_paths.append(module_path)

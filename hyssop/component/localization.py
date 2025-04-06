@@ -12,6 +12,7 @@ Modified By: hsky77
 Last Updated: April 3rd 2025 09:20:34 am
 """
 
+from os.path import dirname
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
@@ -32,6 +33,8 @@ class LocalizationComponent(Component[LocalizationComponentConfig]):
 
     def init(self) -> None:
         self.local = BaseLocal
+        # default csv
+        self.local.import_csvs_from_directory(dirname(__file__))
         self.local.import_csv(self.config.csv_files)
         if self.config.dir is not None:
             self.local.import_csvs_from_directory(join_path(self.project_dir, self.config.dir))

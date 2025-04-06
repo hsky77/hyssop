@@ -1,5 +1,6 @@
 from os import chdir
 from os.path import dirname, isfile
+from sys import path as sys_path
 from typing import Any, Dict, Optional, Type
 from unittest import TestSuite
 
@@ -26,6 +27,7 @@ class HyssopProject:
         self.working_dir = dirname(self.project_dir)
         self.project_dir_name = self.project_dir.split("/")[-1]
         chdir(self.working_dir)
+        sys_path.insert(1, self.project_dir)
 
         if config is None:
             if isfile(self.config_file):
