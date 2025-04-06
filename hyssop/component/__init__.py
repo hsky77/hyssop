@@ -124,5 +124,5 @@ def create_component_manager(
     return component_manager
 
 
-def add_default_component_types(module_path: str):
+def add_default_component_module_path(module_path: str):
     default_component_module_paths.append(module_path)

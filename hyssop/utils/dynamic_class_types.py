@@ -1,6 +1,7 @@
 from importlib import import_module
 from inspect import isclass
-from typing import Any, Generator, Generic, List, Tuple, Type, TypeVar, get_args
+from typing import Any, Generator, Generic, List, Tuple, Type, TypeVar, get_args, Callable
+from inspect import iscoroutinefunction
 
 from .func import join_to_abs_path
 
@@ -26,6 +27,12 @@ class DynamicClassesTypes(Generic[DynamicClassType]):
     def get_dynamic_classes(cls) -> Generator[Tuple[str, Type[DynamicClassType]], Any, None]:
         for k, v in cls.__dict__.items():
             if isclass(v) and issubclass(v, cls.get_generic_type()):
+                yield k.lower(), v
+
+    @classmethod
+    def get_dynamic_functions(cls) -> Generator[Tuple[str, Callable], Any, None]:
+        for k, v in cls.__dict__.items():
+            if iscoroutinefunction(v):
                 yield k.lower(), v
 
     @classmethod

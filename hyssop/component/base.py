@@ -104,7 +104,10 @@ class ComponentManager:
         for component_cls in self.component_classes:
             comp = self._get_component(component_cls.name)
             if comp is not None:
-                await comp.start()
+                if iscoroutinefunction(comp.start):
+                    await comp.start()
+                elif ismethod(comp.start):
+                    comp.start()
 
     async def dispose_components(self):
         """Dispose components."""

@@ -146,10 +146,11 @@ class UTTypes(UnitTestTypes):
 
         with open(join_path(self.project.unitetest_dir, "ut1.py"), "w") as f:
             f.write(
-                """\
-import os
+                """import os
 
-from hello.component import HelloComponentTypes
+"""
+                f"from {self.project.project_dir_name}.component import HelloComponentTypes"
+                """
 from hyssop.project import HyssopProject
 from hyssop.unit_test.base import IUnitTestCase
 
