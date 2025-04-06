@@ -3,7 +3,7 @@
 # This module is part of hyssop and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
 
-'''
+"""
 File created: August 21st 2020
 
 provide basic python unittest.TestSuite of the following test cases:
@@ -26,7 +26,7 @@ Usage:
         1. "foo.py" defines class FooTestCase:
 
             from hyssop.unit_test import UnitTestCase
-            
+
             class FooTestCase(UnitTestCase):
                 # override this test method
                 def test(self):
@@ -39,42 +39,38 @@ Usage:
             class ExTestTypes(UnitTestTypes):
                 FooTest = ('foo_test', 'foo', 'FooTestCase')
 
-        3. In the commond prompt, run command "python -m hyssop test <server_directory>" 
+        3. In the commond prompt, run command "python -m hyssop test <server_directory>"
             to test all the extend test cases defined in "__init__.py"
 
 Modified By: hsky77
-Last Updated: November 22nd 2020 12:23:32 pm
-'''
+Last Updated: April 4th 2025 17:15:07 pm
+"""
 
-import unittest
+from typing import Optional
+from unittest import TestSuite
 
-from .base import UnitTestTypes, UnitTestCase
+from .base import UnitTestTypes
+from .ut_project import TestCaseComponent
+from .ut_worker import TestCaseWorker
 
 
 class DefaultUnitTestTypes(UnitTestTypes):
-    TestUtil = ('test_util', 'util', 'UtilTestCase')
-    TestWorker = ('test_worker', 'util_worker', 'WorkerTestCase')
+    TestComponent = TestCaseComponent
+    TestWorker = TestCaseWorker
 
 
-def get_test_suite() -> unittest.TestSuite:
-    """get test suite of unittest module. 
+def get_test_suite(unittest_module_path: Optional[str] = __package__) -> TestSuite:
+    """
+    get test suite of unittest module.
     It will try to load extend test suite if specifed in server folder "unit_test", elsewise default test suite.
     Default test suite tests util and web modules of hyssop
     """
 
-    suite = unittest.TestSuite()
-    # extension tests
-    try:
-        enums = UnitTestTypes.get_unittest_enum_class()
-    except:
-        pass
-
-    enums = enums if enums else [DefaultUnitTestTypes]
-
-    # default tests
-    for enum in enums:
-        for test_case in enum:
-            test_cls = test_case.import_class()
-            suite.addTest(test_cls('test'))
-
+    suite = TestSuite()
+    if unittest_module_path is None:
+        raise ValueError("unittest_module_path is not specified")
+    types = UnitTestTypes.get_dynamic_classes_types(unittest_module_path)
+    for t in types:
+        for _, test_cls in t.get_dynamic_classes():
+            suite.addTest(test_cls("test"))
     return suite

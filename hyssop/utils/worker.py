@@ -3,7 +3,7 @@
 # This module is part of hyssop and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
 
-'''
+"""
 File created: August 21st 2020
 
 This module defines the classes inherit threading.Thread to execute functions:
@@ -14,17 +14,17 @@ This module defines the classes inherit threading.Thread to execute functions:
 
 Modified By: hsky77
 Last Updated: August 27th 2020 13:04:38 pm
-'''
+"""
 
 import time
-from typing import Callable, Any
-from threading import Thread, Condition, Lock
+from threading import Condition, Lock, Thread
+from typing import Any, Callable, Dict, Optional, Tuple
 
 
 class _BaseWorker(Thread):
     """hyssop-customized python threading.Thread class"""
 
-    def __init__(self, name: str = None):
+    def __init__(self, name: Optional[str] = None):
         super().__init__(name=name)
         self._running = False
         self._disposed = False
@@ -42,10 +42,6 @@ class _BaseWorker(Thread):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.dispose()
-
-    @property
-    def is_started(self):
-        return self._started.is_set()
 
     @property
     def resource_lock(self) -> Lock:
@@ -101,13 +97,9 @@ class _BaseWorker(Thread):
 class Worker(_BaseWorker):
     """hyssop-customized python threading.Thread class to execute functions"""
 
-    def __init__(self, name: str = None):
+    def __init__(self, name: Optional[str] = None):
         super().__init__(name=name)
-        self._func = None
-        self._args = None
-        self._kwargs = None
-        self._on_finish = None
-        self._on_exception = None
+        self._reset()
 
     def __enter__(self):
         return self
@@ -116,12 +108,14 @@ class Worker(_BaseWorker):
     def is_func_running(self) -> bool:
         return self._func is not None
 
-    def run_method(self,
-                   func: Callable,
-                   *args,
-                   on_finish: Callable[[Any], None] = None,
-                   on_exception: Callable[[Exception], None] = None,
-                   **kwargs) -> bool:
+    def run_method(
+        self,
+        func: Callable,
+        *args,
+        on_finish: Optional[Callable[[Any], None]] = None,
+        on_exception: Optional[Callable[[Exception], None]] = None,
+        **kwargs
+    ) -> bool:
         """return True if function will be executed, False if there is a function is running"""
         if self._disposed:
             return False
@@ -135,7 +129,7 @@ class Worker(_BaseWorker):
                 self._on_finish = on_finish
                 self._on_exception = on_exception
 
-                if not self.is_started:
+                if not self.is_alive():
                     self.start()
 
                 self.resume()
@@ -145,25 +139,27 @@ class Worker(_BaseWorker):
     def _run(self) -> Any:
         if callable(self._func):
             try:
-                self._result = self._execute_function(
-                    self._func, *self._args, **self._kwargs)
+                self._result = self._execute_function(self._func, *self._args, **self._kwargs)
                 if callable(self._on_finish):
                     self._on_finish(self._result)
             except Exception as e:  # handle exception here to keep the thread alive
                 if callable(self._on_exception):
                     self._on_exception(e)
             finally:
-                self._func = None
-                self._args = None
-                self._kwargs = None
-                self._on_finish = None
-                self._on_exception = None
+                self._reset()
+
+    def _reset(self):
+        self._func = None
+        self._on_finish = None
+        self._on_exception = None
+        self._args: Tuple[Any] = tuple()
+        self._kwargs: Dict[str, Any] = {}
 
 
 class FunctionQueueWorker(_BaseWorker):
     """worker that queues functions to execute"""
 
-    def __init__(self, name: str = None):
+    def __init__(self, name: Optional[str] = None):
         super().__init__(name)
         self.__tasks = []
 
@@ -174,26 +170,24 @@ class FunctionQueueWorker(_BaseWorker):
     def pending_count(self) -> int:
         return len(self.__tasks)
 
-    def run_method(self,
-                   func: Callable,
-                   *args,
-                   on_finish: Callable[[Any], None] = None,
-                   on_exception: Callable[[Exception], None] = None,
-                   **kwargs) -> None:
+    def run_method(
+        self,
+        func: Callable,
+        *args,
+        on_finish: Optional[Callable[[Any], None]] = None,
+        on_exception: Optional[Callable[[Exception], None]] = None,
+        **kwargs
+    ) -> None:
         """func will be queued and run when the worker thread is free"""
         if self._disposed:
             return None
 
         if callable(func):
-            self.__tasks.append({
-                'func': func,
-                'on_finish': on_finish,
-                'on_exception': on_exception,
-                'args': args,
-                'kwargs': kwargs
-            })
+            self.__tasks.append(
+                {"func": func, "on_finish": on_finish, "on_exception": on_exception, "args": args, "kwargs": kwargs}
+            )
 
-            if not self.is_started:
+            if not self.is_alive():
                 self.start()
 
             self.resume()
@@ -203,24 +197,25 @@ class FunctionQueueWorker(_BaseWorker):
             task = self.__tasks.pop(0)
 
             try:
-                result = self._execute_function(
-                    task['func'], *task['args'], **task['kwargs'])
-                if callable(task['on_finish']):
-                    task['on_finish'](result)
+                result = self._execute_function(task["func"], *task["args"], **task["kwargs"])
+                if callable(task["on_finish"]):
+                    task["on_finish"](result)
             except Exception as e:
-                if callable(task['on_exception']):
-                    task['on_exception'](e)
+                if callable(task["on_exception"]):
+                    task["on_exception"](e)
 
 
 class FunctionLoopWorker(_BaseWorker):
     """worker class loops a single function in one period before calling stop()"""
 
-    def __init__(self, name: str = None, loop_interval_seconds: float = 1.0):
+    def __init__(self, name: Optional[str] = None, loop_interval_seconds: float = 1.0):
         super().__init__(name=name)
         self.__loop_interval_seconds = loop_interval_seconds
         self.__on_method_runned = None
         self.__on_exception = None
         self.stop()
+        self._args: Tuple[Any] = tuple()
+        self._kwargs: Dict[str, Any] = {}
 
     def __enter__(self):
         return self
@@ -233,17 +228,19 @@ class FunctionLoopWorker(_BaseWorker):
     def stop(self):
         """stop looping"""
         self._func = None
-        self._args = None
-        self._kwargs = None
+        self._args = tuple()
+        self._kwargs = {}
         self.__on_method_runned = None
         self.__on_exception = None
 
-    def run_method(self,
-                   func: Callable,
-                   *args,
-                   on_method_runned: Callable[[Any], None] = None,
-                   on_exception: Callable[[Exception], None] = None,
-                   **kwargs) -> None:
+    def run_method(
+        self,
+        func: Callable,
+        *args,
+        on_method_runned: Optional[Callable[[Any], None]] = None,
+        on_exception: Optional[Callable[[Exception], None]] = None,
+        **kwargs
+    ) -> None:
         """start looping function"""
         if self._disposed:
             return None
@@ -256,7 +253,7 @@ class FunctionLoopWorker(_BaseWorker):
                 self.__on_method_runned = on_method_runned
                 self.__on_exception = on_exception
 
-                if not self.is_started:
+                if not self.is_alive():
                     self._running = True
                     self.start()
 
@@ -265,8 +262,7 @@ class FunctionLoopWorker(_BaseWorker):
     def _run(self):
         while callable(self._func):
             try:
-                result = self._execute_function(
-                    self._func, *self._args, **self._kwargs)
+                result = self._execute_function(self._func, *self._args, **self._kwargs)
                 if callable(self.__on_method_runned):
                     self.__on_method_runned(result)
             except Exception as e:
