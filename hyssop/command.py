@@ -18,15 +18,6 @@ from .utils.func import join_path, join_to_abs_path
 from .project import HyssopProject
 from . import Module_Path
 
-# from .project import (
-#     Unittest_Module_Folder,
-#     Project_Config_File,
-#     Project_Pack_File,
-#     Project_Requirement_File,
-#     Component_Module_Folder,
-#     Controller_Module_Folder,
-# )
-
 
 class CommandProcessor:
     Command_Test_Project = "test"

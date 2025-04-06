@@ -47,10 +47,6 @@ class HyssopProject:
     def unit_test_module(self) -> str:
         return f"{self.project_dir_name}.{self.Unittest_Module_Folder}"
 
-    # @property
-    # def project_controller_dir(self) -> str:
-    #     return join_path(self.project_dir, self.Controller_Module_Folder)
-
     @property
     def unitetest_dir(self) -> str:
         return join_path(self.project_dir, self.Unittest_Module_Folder)
